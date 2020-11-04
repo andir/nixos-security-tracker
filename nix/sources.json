@@ -1,0 +1,50 @@
+{
+    "gitignore": {
+        "branch": "master",
+        "description": "Nix function for filtering local git sources",
+        "homepage": "",
+        "owner": "hercules-ci",
+        "repo": "gitignore",
+        "rev": "c4662e662462e7bf3c2a968483478a665d00e717",
+        "sha256": "1npnx0h6bd0d7ql93ka7azhj40zgjp815fw2r6smg8ch9p7mzdlx",
+        "type": "tarball",
+        "url": "https://github.com/hercules-ci/gitignore/archive/c4662e662462e7bf3c2a968483478a665d00e717.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "nix-pre-commit-hooks": {
+        "branch": "master",
+        "description": "Seamless integration of https://pre-commit.com git hooks with Nix.",
+        "homepage": "",
+        "owner": "cachix",
+        "repo": "pre-commit-hooks.nix",
+        "rev": "9bc92ae2d0620e493be99d3be300c108a2f92597",
+        "sha256": "0wpipjcj4dhnxb7360qkmgnm5pnifhd4vcvawv5ick8wrmrrhlan",
+        "type": "tarball",
+        "url": "https://github.com/cachix/pre-commit-hooks.nix/archive/9bc92ae2d0620e493be99d3be300c108a2f92597.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "nixpkgs": {
+        "branch": "nixos-unstable",
+        "description": "Nix Packages collection",
+        "homepage": "",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "34ad166a830d3ac1541dcce571c52231f2f0865a",
+        "sha256": "1jvi1562x3kq65w642vfimpszv65zbc7c2nv8gakhzcx4n3f47xq",
+        "type": "tarball",
+        "url": "https://github.com/NixOS/nixpkgs/archive/34ad166a830d3ac1541dcce571c52231f2f0865a.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "poetry2nix": {
+        "branch": "master",
+        "description": "Convert poetry projects to nix automagically [maintainer=@adisbladis] ",
+        "homepage": "",
+        "owner": "nix-community",
+        "repo": "poetry2nix",
+        "rev": "f0cc43e09f6adbbde8c1207d511cd124cdca28f4",
+        "sha256": "020qpwprkb52gimvmipixc7zqqmaxagxw9ddr75yf762s312byi3",
+        "type": "tarball",
+        "url": "https://github.com/nix-community/poetry2nix/archive/f0cc43e09f6adbbde8c1207d511cd124cdca28f4.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    }
+}

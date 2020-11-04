@@ -1,0 +1,2 @@
+recursive-include nixos_security_tracker/static *
+recursive-include nixos_security_tracker/templates *
