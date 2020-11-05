@@ -13,7 +13,7 @@ from typing import List
 from pathlib import Path
 
 
-TEST_RUNNER = "nixos_security_tracker.test_runner.PytestTestRunner"
+TEST_RUNNER = "nixos_security_tracker.pytest_runner.PytestTestRunner"
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "tracker",
+    "bootstrap4",
 ]
 
 MIDDLEWARE = [
@@ -116,3 +117,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = "/static/"
+
+
+# FIXME: serve the CSS & JavaScript files locally instead of pointing at some CDN
+BOOTSTRAP4 = {}

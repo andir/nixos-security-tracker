@@ -118,8 +118,11 @@ class Advisory(models.Model):
     )
 
     def make_text(self) -> str:
+        # FIXME: the label field is missing from the TextChoices in
+        # django-stubs: https://github.com/typeddjango/django-stubs/issues/346
+        label: str = getattr(self.severity, "label")
         text = f"""
-            {self.nsa_id} ({self.severity.label}) - {self.title}
+            {self.nsa_id} ({label}) - {self.title}
 
             ------------
 

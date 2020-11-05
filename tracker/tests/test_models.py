@@ -2,7 +2,9 @@ import pytest
 from django.test import TestCase
 from unittest import TestCase
 
-from .models import (
+from .factories import IssueFactory, PackageFactory
+
+from ..models import (
     Issue,
     Package,
     SCMRevision,
@@ -14,16 +16,9 @@ from .models import (
 
 
 @pytest.mark.django_db
-def test_create_issue_with_advisory():
-    release = Release.objects.create()
-    revision = SCMRevision.objects.create(release=release)
-
-    package = Package.objects.create(
-        revision=revision, attribute_name="hello", name="hello", version="123",
-    )
-
-    assert package.name == "hello"
-    issue = Issue.objects.create()
+def test_advisory_make_text():
+    package = PackageFactory()
+    issue = IssueFactory()
     issue.packages.add(package)
 
     advisory = Advisory.objects.create(

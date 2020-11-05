@@ -1,3 +1,8 @@
 from django.shortcuts import render
 
-# Create your views here.
+from .models import Advisory
+
+
+def list_advisories(request):
+    advisories = Advisory.objects.all()
+    return render(request, "advisories/list.html", dict(advisories=advisories))

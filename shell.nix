@@ -14,6 +14,9 @@ let
     poetrylock = ./poetry.lock;
   };
 
+  test-runner = pkgs.writeShellScriptBin "test-runner" ''
+    find . -type f -iname '*.py' | ${pkgs.entr}/bin/entr -cr python manage.py test
+  '';
 
 in
 pkgs.mkShell {
@@ -27,6 +30,8 @@ pkgs.mkShell {
     pkgs.python3Packages.mypy
     pkgs.python3Packages.flake8
     pkgs.python3Packages.isort
+
+    test-runner
   ];
 
   inherit (pre-commit-hooks) shellHook;

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block "content" %}
+<h1>Advisories</h1>
+<ul>
+{% for advisory in advisories %}
+<li>
+{{ advisory.title }}
+</li>
+{% endfor %}
+</ul>
+{% endblock %}
