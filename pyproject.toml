@@ -3,17 +3,26 @@ name = "nixos_security_tracker"
 version = "0.1.0"
 description = ""
 authors = ["Andreas Rammhold <andreas@rammhold.de>"]
+packages = [
+	{ include = "nixos_security_tracker" },
+	{ include = "tracker" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
 Django = "^3.1.3"
 django-bootstrap4 = "^2.3.1"
+uvicorn = {extras = ["standard"], version = "^0.12.2"}
+gunicorn = "^20.0.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
 pytest-django = "^4.1.0"
 django-stubs = "^1.7.0"
 factory-boy = "^3.1.0"
+bpython = "^0.20"
+uvicorn = {extras = ["standard"], version = "^0.12.2"}
+selenium = "^3.141.0"
 
 [tool.poetry.scripts]
 # value needs a colon (:)

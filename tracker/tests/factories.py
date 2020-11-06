@@ -1,5 +1,5 @@
 from factory.django import DjangoModelFactory
-from factory import SubFactory
+from factory import SubFactory, Sequence
 
 from tracker import models
 
@@ -7,6 +7,8 @@ from tracker import models
 class IssueFactory(DjangoModelFactory):
     class Meta:
         model = models.Issue
+
+    identifier = Sequence(lambda n: f"CVE-{n}")
 
 
 class ReleaseFactory(DjangoModelFactory):
@@ -31,3 +33,5 @@ class PackageFactory(DjangoModelFactory):
 class AdvisoryFactory(DjangoModelFactory):
     class Meta:
         model = models.Advisory
+
+    nsa_id = Sequence(lambda n: f"NSA{n}")

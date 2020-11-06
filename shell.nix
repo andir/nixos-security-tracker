@@ -15,7 +15,7 @@ let
   };
 
   test-runner = pkgs.writeShellScriptBin "test-runner" ''
-    find . -type f -iname '*.py' | ${pkgs.entr}/bin/entr -cr python manage.py test
+    find . -type f -iname '*.py' | ${pkgs.entr}/bin/entr -cr python manage.py test "$@"
   '';
 
 in

@@ -57,7 +57,11 @@ class Issue(models.Model):
     """
 
     identifier = models.CharField(
-        max_length=32, help_text="Well-known (external) identifier (e.g. CVE number)"
+        max_length=32,
+        help_text="Well-known (external) identifier (e.g. CVE number)",
+        blank=False,
+        unique=True,
+        default=None,
     )
     description = models.TextField(blank=True, help_text="A description for this issue")
     packages = models.ManyToManyField(Package, through="PackageAdvisoryStatus")
@@ -86,7 +90,7 @@ class Advisory(models.Model):
     Advisory for users of NixOS about one or more vulnerabilities/issues.
     """
 
-    nsa_id = models.CharField(max_length=32, unique=True)
+    nsa_id = models.CharField(max_length=32, unique=True, blank=False)
 
     # FIXME: Add a `through` table that enforces RESTRICT or PROTECT on the foreign keys
     issues = models.ManyToManyField(

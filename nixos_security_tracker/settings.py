@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 from typing import List
 from pathlib import Path
+import os
 
 
 TEST_RUNNER = "nixos_security_tracker.pytest_runner.PytestTestRunner"
@@ -81,7 +82,9 @@ WSGI_APPLICATION = "nixos_security_tracker.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": os.getenv(
+            "NIXOS_SECURITY_TRACKER_DATABASE_NAME", BASE_DIR / "db.sqlite3"
+        ),
     }
 }
 
@@ -118,6 +121,7 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 
+STATIC_ROOT = os.getenv("NIXOS_SECURITY_TRACKER_STATIC_ROOT")
 
 # FIXME: serve the CSS & JavaScript files locally instead of pointing at some CDN
 BOOTSTRAP4 = {}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block "content" %}
+<h1>Issues</h1>
+<ul>
+{% for issue in issues %}
+<li>
+{{ issue.identifier }}
+</li>
+{% endfor %}
+</ul>
+{% endblock %}
