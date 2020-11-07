@@ -19,8 +19,8 @@ pkgs.nixosTest {
     server.wait_for_unit("multi-user.target")
     server.wait_for_unit("nginx.service")
     server.wait_for_open_port(80)
-    server.succeed("curl -q --fail localhost")
-    server.succeed("curl -q --fail localhost/static/admin/js/core.js")
+    server.succeed("curl -s --fail localhost")
+    server.succeed("curl -s --fail localhost/static/admin/js/core.js")
 
     with subtest("NVD import"):
         # at first there must be no errors and no CVE's
