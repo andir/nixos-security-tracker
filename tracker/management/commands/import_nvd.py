@@ -2,7 +2,7 @@ import datetime
 import json
 import os
 from gzip import GzipFile
-from typing import BinaryIO
+from typing import BinaryIO, Dict
 
 import requests
 from django.core.management.base import BaseCommand
@@ -36,6 +36,8 @@ class Command(BaseCommand):
             data = gzip_decompress(response.raw)
             data = json.load(data)
 
+            cves: Dict[str, str] = {}
+
             for cve_item in data["CVE_Items"]:
                 cve = cve_item["cve"]
                 identifier = cve["CVE_data_meta"]["ID"]
@@ -47,16 +49,29 @@ class Command(BaseCommand):
                     if entry["lang"] == "en"
                 )
 
-                (issue, created) = Issue.objects.get_or_create(
-                    identifier=identifier, defaults={"description": description}
+                cves[identifier] = description
+
+            cve_ids = set(cves.keys())
+            existing_issues = Issue.objects.filter(identifier__in=cve_ids)
+            missing_issues = cve_ids ^ set(i.identifier for i in existing_issues)
+
+            # insert all the missing issues
+            if missing_issues:
+                Issue.objects.bulk_create(
+                    (Issue(identifier=i, description=cves[i]) for i in missing_issues)
                 )
-                if not created:
+
+            for issue in existing_issues:
+                description = cves[issue.identifier]
+                if issue.description != description:
                     self.stdout.write(
-                        self.style.NOTICE(f"Updating description of issue {identifier}")
+                        self.style.NOTICE(
+                            f"Updating description of issue {issue.identifier}"
+                        )
                     )
-                    if issue.description != description:
-                        issue.description = description
-                        issue.save()
+
+                    issue.description = description
+                    issue.save()
 
 
 def gzip_decompress(input: BinaryIO) -> BinaryIO:
