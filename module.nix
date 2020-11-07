@@ -81,7 +81,7 @@ in
             DynamicUser = true;
             RemainAfterExit = true;
             StateDirectory = "nixos-security-tracker";
-            PrivateTemp = true;
+            PrivateTmp = true;
           };
         };
 
@@ -108,7 +108,7 @@ in
             Type = "oneshot";
             DynamicUser = true;
             StateDirectory = "nixos-security-tracker";
-            PrivateTemp = true;
+            PrivateTmp = true;
           };
 
         };
@@ -135,7 +135,7 @@ in
             Type = "notify";
             DynamicUser = true;
             StateDirectory = "nixos-security-tracker";
-            PrivateTemp = true;
+            PrivateTmp = true;
           };
         };
       };
