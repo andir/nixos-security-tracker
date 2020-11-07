@@ -1,14 +1,9 @@
 import pytest
-from django.db.utils import IntegrityError
 from django.db import transaction
+from django.db.utils import IntegrityError
 
-from .factories import IssueFactory, PackageFactory, AdvisoryFactory
-from ..models import (
-    Issue,
-    Advisory,
-    AdvisoryStatus,
-    AdvisorySeverity,
-)
+from ..models import Advisory, AdvisorySeverity, AdvisoryStatus, Issue
+from .factories import AdvisoryFactory, IssueFactory, PackageFactory
 
 
 @pytest.mark.django_db

@@ -6,6 +6,11 @@ let
     hooks = {
       nixpkgs-fmt.enable = true;
       black.enable = true;
+      isort = {
+        enable = true;
+        entry = "${pkgs.python3Packages.isort}/bin/isort --apply --atomic";
+        pass_filenames = false;
+      };
       django-migration-check = {
         enable = true;
         entry = "${env}/bin/python manage.py makemigrations --check";
