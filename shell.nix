@@ -16,6 +16,11 @@ let
         entry = "${env}/bin/python manage.py makemigrations --check";
         pass_filenames = false;
       };
+      editorconfig = {
+        enable = true;
+        entry = "${pkgs.editorconfig-checker}/bin/editorconfig-checker '\\.git'";
+        pass_filenames = false;
+      };
     };
   };
   env = pkgs.poetry2nix.mkPoetryEnv {
