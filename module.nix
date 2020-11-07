@@ -13,6 +13,13 @@ in
           Whether migrations should be run on startup.
         '';
       };
+      scheduleNVDUpdates = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = ''
+          Whether updates from the NVD CVE database should be imported regularly.
+        '';
+      };
       virtualHost = lib.mkOption {
         type = lib.types.str;
         default = "localhost";
@@ -32,7 +39,7 @@ in
   config = lib.mkIf cfg.enable {
     nixpkgs.overlays = [
       (self: super: {
-        nixos-security-tracker = super.callPackage ./default.nix { };
+        nixos-security-tracker = import ./default.nix { };
       })
     ];
 
@@ -50,36 +57,86 @@ in
       wantedBy = [ "sockets.target" ];
     };
 
-    systemd.services.nixos-security-tracker =
+    systemd.services =
       let
         envFile = pkgs.writeText "env" ''
           export NIXOS_SECURITY_TRACKER_DATABASE_NAME="$STATE_DIRECTORY/database.sqlite"
         '';
       in
       {
-        path = [
-          pkgs.nixos-security-tracker.manage
-          pkgs.nixos-security-tracker.env
-        ];
-        environment = {
-          ENVFILE = toString envFile;
+        nixos-security-tracker-migrate = lib.mkIf cfg.runMigrations {
+          wantedBy = [ "multi-user.target" ];
+          path = [
+            pkgs.nixos-security-tracker.manage
+          ];
+          environment = {
+            ENVFILE = toString envFile;
+          };
+          script = lib.mkIf cfg.runMigrations ''
+            source $ENVFILE
+            exec manage migrate
+          '';
+          serviceConfig = {
+            Type = "oneshot";
+            DynamicUser = true;
+            RemainAfterExit = true;
+            StateDirectory = "nixos-security-tracker";
+            PrivateTmp = true;
+          };
         };
-        preStart = lib.mkIf cfg.runMigrations '' source $ENVFILE
-        exec manage migrate
-      '';
-        script = ''
-          source $ENVFILE
-          exec gunicorn ${pkgs.nixos-security-tracker.asgiPath} \
-            -k uvicorn.workers.UvicornWorker \
-            --name nixos-security-tracker \
-            --workers ${toString cfg.workers}
-        '';
-        serviceConfig = {
-          ExecReload = "${pkgs.coreutils}/bin/kill -s HUP $MAINPID";
-          Type = "notify";
-          DynamicUser = true;
-          StateDirectory = "nixos-security-tracker";
-          PrivateTemp = true;
+
+        nixos-security-tracker-update = lib.mkIf cfg.scheduleNVDUpdates {
+          path = [
+            pkgs.nixos-security-tracker.manage
+            pkgs.nixos-security-tracker.env
+          ];
+          environment = {
+            ENVFILE = toString envFile;
+          };
+
+          after = lib.mkIf cfg.runMigrations [ "nixos-security-tracker-migrate.service" ];
+          requires = lib.mkIf cfg.runMigrations [ "nixos-security-tracker-migrate.service" ];
+
+          script = ''
+            source $ENVFILE
+            exec manage import_nvd
+          '';
+
+          startAt = "daily"; # FIXME: make configurable
+
+          serviceConfig = {
+            Type = "oneshot";
+            DynamicUser = true;
+            StateDirectory = "nixos-security-tracker";
+            PrivateTmp = true;
+          };
+
+        };
+
+        nixos-security-tracker = {
+          path = [
+            pkgs.nixos-security-tracker.manage
+            pkgs.nixos-security-tracker.env
+          ];
+          environment = {
+            ENVFILE = toString envFile;
+          };
+          after = lib.mkIf cfg.runMigrations [ "nixos-security-tracker-migrate.service" ];
+          requires = lib.mkIf cfg.runMigrations [ "nixos-security-tracker-migrate.service" ];
+          script = ''
+            source $ENVFILE
+            exec gunicorn ${pkgs.nixos-security-tracker.asgiPath} \
+              -k uvicorn.workers.UvicornWorker \
+              --name nixos-security-tracker \
+              --workers ${toString cfg.workers}
+          '';
+          serviceConfig = {
+            ExecReload = "${pkgs.coreutils}/bin/kill -s HUP $MAINPID";
+            Type = "notify";
+            DynamicUser = true;
+            StateDirectory = "nixos-security-tracker";
+            PrivateTmp = true;
+          };
         };
       };
   };

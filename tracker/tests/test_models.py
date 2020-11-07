@@ -63,3 +63,10 @@ def test_issue_identifier_must_be_unique():
     with pytest.raises(IntegrityError):
         i2 = Issue(identifier=identifier)
         i2.save()
+
+
+@pytest.mark.django_db
+def test_issue_factory_sets_identifier_and_description():
+    i = IssueFactory()
+    assert i.identifier and i.identifier != ""
+    assert i.description and i.description != ""

@@ -9,6 +9,7 @@ class IssueFactory(DjangoModelFactory):
         model = models.Issue
 
     identifier = Sequence(lambda n: f"CVE-{n}")
+    description = Sequence(lambda n: f"description {n}")
 
 
 class ReleaseFactory(DjangoModelFactory):
