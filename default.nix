@@ -7,6 +7,10 @@ let
     python = pkgs.python3;
     checkPhase = ''
       pytest .
+
+      # test that migrations actually work & are up to date
+      python manage.py makemigrations --check
+      python manage.py migrate
     '';
   };
   env = pkg.python.withPackages (_: [ pkg ]);
