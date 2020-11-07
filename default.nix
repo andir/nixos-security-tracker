@@ -6,7 +6,7 @@ let
     projectDir = ./.;
     python = pkgs.python3;
     checkPhase = ''
-      pytest .
+      SKIP_E2E_TESTS=1 pytest .
 
       # test that migrations actually work & are up to date
       python manage.py makemigrations --check
