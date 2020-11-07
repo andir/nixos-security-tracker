@@ -1,7 +1,7 @@
 import os
 from io import StringIO
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 import requests
@@ -20,22 +20,32 @@ def test_import_nvd_requires_valid_url():
         call_command("import_nvd", "not-a-url", stdout=out)
 
 
-@pytest.fixture
+@pytest.fixture(name="nvd_json_data")
+def nvd_json_data_fixture():
+    return nvd_json_data()
+
+
 def nvd_json_data():
-    with open(FIXTURE_DIR / "nvdcve-1.1-2002.json.gz", "rb") as fh:
-        yield fh
+    return open(FIXTURE_DIR / "nvdcve-1.1-2002.json.gz", "rb")
+
+
+def mocked_nvd_response():
+    mock = MagicMock()
+    mock.status_code = 200
+    mock.raw = nvd_json_data()
+    return mock
+
+
+@pytest.fixture(name="mocked_nvd_response")
+def mocked_nvd_response_fixture():
+    return mocked_nvd_response()
 
 
 @patch("requests.get")
 @pytest.mark.django_db
-def test_import_nvd(request_get, nvd_json_data):
+def test_import_nvd(request_get, mocked_nvd_response):
     url = "https://test-dat"
-    mock = MagicMock()
-
-    mock.status_code = 200
-    mock.raw = nvd_json_data
-
-    request_get.return_value = mock
+    request_get.return_value = mocked_nvd_response
     call_command("import_nvd", url)
     request_get.assert_called_once_with(url, stream=True)
 
@@ -56,8 +66,42 @@ def test_import_nvd(request_get, nvd_json_data):
 
 
 @patch("requests.get")
+@patch.dict("os.environ", {"NIXOS_SECURITY_TRACKER_NVD_URLS": "https://test-data"})
 @pytest.mark.django_db
-def test_import_nvd_updates_description(request_get, nvd_json_data):
+def test_import_nvd_accepts_env_var(request_get, mocked_nvd_response):
+    url = "https://test-data"
+    request_get.return_value = mocked_nvd_response
+    call_command("import_nvd")
+    request_get.assert_called_once_with(url, stream=True)
+
+
+@patch("requests.get")
+@patch.dict("os.environ", {"NIXOS_SECURITY_TRACKER_NVD_URLS": "https://bogon"})
+@pytest.mark.django_db
+def test_import_nvd_accepts_prefers_cli_arguments(request_get, mocked_nvd_response):
+    url = "https://test-data"
+    request_get.return_value = mocked_nvd_response
+    call_command("import_nvd", url)
+    request_get.assert_called_once_with(url, stream=True)
+
+
+@patch("requests.get")
+@patch.dict(
+    "os.environ",
+    {"NIXOS_SECURITY_TRACKER_NVD_URLS": "https://test-data;https://another"},
+)
+@pytest.mark.django_db
+def test_import_nvd_accepts_multiple_env_vars(request_get):
+    request_get.side_effect = [mocked_nvd_response(), mocked_nvd_response()]
+    call_command("import_nvd")
+    request_get.assert_has_calls(
+        [call("https://test-data", stream=True), call("https://another", stream=True)]
+    )
+
+
+@patch("requests.get")
+@pytest.mark.django_db
+def test_import_nvd_updates_description(request_get, mocked_nvd_response):
     url = "https://test-dat"
     identifier = "CVE-1999-0001"
     expected_description = "ip_input.c in BSD-derived TCP/IP implementations allows remote attackers to cause a denial of service (crash or hang) via crafted packets."
@@ -66,12 +110,7 @@ def test_import_nvd_updates_description(request_get, nvd_json_data):
         identifier=identifier, description="This is an outdated description"
     )
 
-    mock = MagicMock()
-
-    mock.status_code = 200
-    mock.raw = nvd_json_data
-
-    request_get.return_value = mock
+    request_get.return_value = mocked_nvd_response
     call_command("import_nvd", url)
     request_get.assert_called_once_with(url, stream=True)
 

@@ -1,4 +1,6 @@
+import datetime
 import json
+import os
 from gzip import GzipFile
 from typing import BinaryIO
 
@@ -13,11 +15,22 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "url", nargs="+", type=str, help="URL of the NVD JSON in version 1.1"
+            "url", nargs="*", type=str, help="URL of the NVD JSON in version 1.1"
         )
 
     def handle(self, *args, **options):
-        for url in options["url"]:
+        urls = options["url"]
+        env_urls = os.environ.get("NIXOS_SECURITY_TRACKER_NVD_URLS")
+        if not urls and env_urls:
+            urls = env_urls.split(";")
+
+        if not urls:
+            url = [
+                f"https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-{year}.json.gz"
+                for year in range(2002, datetime.date.today().year)
+            ]
+
+        for url in urls:
             response = requests.get(url, stream=True)
             assert response.status_code == 200
             data = gzip_decompress(response.raw)

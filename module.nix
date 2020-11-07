@@ -13,6 +13,13 @@ in
           Whether migrations should be run on startup.
         '';
       };
+      scheduleNVDUpdates = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = ''
+          Whether updates from the NVD CVE database should be imported regularly.
+        '';
+      };
       virtualHost = lib.mkOption {
         type = lib.types.str;
         default = "localhost";
@@ -32,7 +39,7 @@ in
   config = lib.mkIf cfg.enable {
     nixpkgs.overlays = [
       (self: super: {
-        nixos-security-tracker = super.callPackage ./default.nix { };
+        nixos-security-tracker = import ./default.nix { };
       })
     ];
 
@@ -76,6 +83,34 @@ in
             StateDirectory = "nixos-security-tracker";
             PrivateTemp = true;
           };
+        };
+
+        nixos-security-tracker-update = lib.mkIf cfg.scheduleNVDUpdates {
+          path = [
+            pkgs.nixos-security-tracker.manage
+            pkgs.nixos-security-tracker.env
+          ];
+          environment = {
+            ENVFILE = toString envFile;
+          };
+
+          after = lib.mkIf cfg.runMigrations [ "nixos-security-tracker-migrate.service" ];
+          requires = lib.mkIf cfg.runMigrations [ "nixos-security-tracker-migrate.service" ];
+
+          script = ''
+            source $ENVFILE
+            exec manage import_nvd
+          '';
+
+          startAt = "daily"; # FIXME: make configurable
+
+          serviceConfig = {
+            Type = "oneshot";
+            DynamicUser = true;
+            StateDirectory = "nixos-security-tracker";
+            PrivateTemp = true;
+          };
+
         };
 
         nixos-security-tracker = {
