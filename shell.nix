@@ -6,6 +6,11 @@ let
     hooks = {
       nixpkgs-fmt.enable = true;
       black.enable = true;
+      django-migration-check = {
+        enable = true;
+        entry = "${env}/bin/python manage.py makemigrations --check";
+        pass_filenames = false;
+      };
     };
   };
   env = pkgs.poetry2nix.mkPoetryEnv {
