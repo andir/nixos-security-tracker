@@ -1,15 +1,14 @@
-import pytest
-from pytest_django.asserts import assertTemplateUsed, assertRedirects
-
-from django.contrib.auth.models import User
-from django.contrib.auth import get_user as auth_get_user
-from django.urls import reverse
 from typing import List
 
+import pytest
+from django.contrib.auth import get_user as auth_get_user
+from django.contrib.auth.models import User
+from django.urls import reverse
+from pytest_django.asserts import assertRedirects, assertTemplateUsed
 
-from .factories import AdvisoryFactory, IssueFactory
 from ..models import Advisory
 from ..views import list_advisories
+from .factories import AdvisoryFactory, IssueFactory
 
 
 @pytest.mark.django_db

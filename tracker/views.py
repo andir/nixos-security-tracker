@@ -1,9 +1,8 @@
-from django.shortcuts import render, redirect
+from django.contrib.auth.views import LoginView as AuthLoginView
+from django.shortcuts import redirect, render
 from django.urls import reverse
 
 from .models import Advisory, Issue
-
-from django.contrib.auth.views import LoginView as AuthLoginView
 
 
 class LoginView(AuthLoginView):
