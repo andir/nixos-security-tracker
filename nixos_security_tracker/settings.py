@@ -124,3 +124,6 @@ STATIC_ROOT = os.getenv("NIXOS_SECURITY_TRACKER_STATIC_ROOT")
 
 # FIXME: serve the CSS & JavaScript files locally instead of pointing at some CDN
 BOOTSTRAP4 = {}
+
+# Number of items per page in views
+PAGINATE_BY = 15

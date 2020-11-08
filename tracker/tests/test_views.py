@@ -1,6 +1,7 @@
 from typing import List
 
 import pytest
+from django.conf import settings
 from django.contrib.auth import get_user as auth_get_user
 from django.contrib.auth.models import User
 from django.urls import reverse
@@ -79,10 +80,9 @@ def test_list_empty_issues(client):
 def test_list_issues(client):
     issues = IssueFactory.create_batch(100)
 
-    page_len = 15  # TODO: make this a global setting
     for idx, issue in enumerate(issues):
-        if idx % page_len == 0:
-            page = 1 + idx // page_len
+        if idx % settings.PAGINATE_BY == 0:
+            page = 1 + idx // settings.PAGINATE_BY
             response = client.get(reverse("issues"), {"page": page})
             assert response.status_code == 200
             assertTemplateUsed(response, "issues/list.html")

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.views import LoginView as AuthLoginView
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -28,6 +29,6 @@ class IssueDetail(DetailView):
 
 
 class IssueListView(ListView):
-    paginate_by = 15
+    paginate_by = settings.PAGINATE_BY
     model = Issue
     template_name = "issues/list.html"
