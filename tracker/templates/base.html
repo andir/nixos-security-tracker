@@ -1,6 +1,7 @@
-<!DOCTYPE html>
+{% load nav %}<!DOCTYPE html>
 <html>
 <head>
+<title>{% block "title" %}{% endblock %} | NixOS Security Tracker</title>
 <meta charset="UTF-8">
 {# Load CSS and JavaScript #}
 {% load bootstrap4 %}{% bootstrap_css %}
@@ -9,7 +10,35 @@
 <body>
 
 {% bootstrap_messages %}
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="/">NixOS Security Tracker</a>
+
+    <ul class="navbar-nav">
+        <li class="nav-item{% active "advisories" %}">
+            <a class="nav-link" href="{% url "advisories" %}">Advisories</a>
+        </li>
+        <li class="nav-item{% active "issues" %}">
+            <a class="nav-link" href="{% url "issues" %}">Issues</a>
+        </li>
+    </ul>
+
+    <ul class="navbar-nav ml-auto">
+        {% if is_authenticated %}
+        <li class="nav-item">
+            <a class="nav-link{% active "logout" %}" href="{% url "auth:logout" %}">Logout</a>
+        </li>
+        {% else %}
+        <li class="nav-item">
+            <a class="nav-link{% active "login" %}" href="{% url "auth:login" %}">Login</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+
+<div class="container">
 {% block "content" %}
 {% endblock %}
+</div>
 </body>
 </html>
