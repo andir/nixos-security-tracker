@@ -79,10 +79,14 @@ def test_list_empty_issues(client):
 def test_list_issues(client):
     issues = IssueFactory.create_batch(100)
 
-    response = client.get(reverse("issues"))
-    assert response.status_code == 200
-    assertTemplateUsed(response, "issues/list.html")
-    for issue in issues:
+    page_len = 15  # TODO: make this a global setting
+    for idx, issue in enumerate(issues):
+        if idx % page_len == 0:
+            page = 1 + idx // page_len
+            response = client.get(reverse("issues"), {"page": page})
+            assert response.status_code == 200
+            assertTemplateUsed(response, "issues/list.html")
+
         assert issue.identifier in response.content.decode("utf-8")
         assert issue.description in response.content.decode("utf-8")
 
