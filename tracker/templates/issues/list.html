@@ -4,11 +4,17 @@
 
 {% block "content" %}
 <h1>Issues</h1>
+
+{% include "pagination.html" %}
+
 <ul>
-{% for issue in issues %}
+{% for issue in object_list %}
 <li>
     <a href={% url 'issue_detail' issue.identifier %}>{{ issue.identifier }}</a> - {{ issue.description }}
 </li>
 {% endfor %}
 </ul>
+
+{% include "pagination.html" %}
+
 {% endblock %}

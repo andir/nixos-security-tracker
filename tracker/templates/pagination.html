@@ -1,0 +1,36 @@
+{% load pagination %}
+{% page_list page_obj as pages %}
+<nav aria-label="Pagination">
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link">Previous</a>
+        </li>
+        {% endif %}
+
+        {% for page in pages %}
+        {% if page == "..." %}
+        <li class="page-item disabled">
+            <a class="page-link">...</a>
+        </li>
+        {% else %}
+        <li class="page-item">
+            <a class="page-link{% if page_obj.number == page %} font-weight-bold{% endif %}" href="?page={{ page }}">{{ page }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link" href="#">Next</a>
+        </li>
+        {% endif %}
+  </ul>
+</nav>
