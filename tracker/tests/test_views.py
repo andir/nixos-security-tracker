@@ -85,3 +85,14 @@ def test_list_issues(client):
     for issue in issues:
         assert issue.identifier in response.content.decode("utf-8")
         assert issue.description in response.content.decode("utf-8")
+
+
+@pytest.mark.django_db
+def test_detail_issue(client):
+    issue = IssueFactory()
+    response = client.get(
+        reverse("issue_detail", kwargs={"identifier": issue.identifier})
+    )
+    assert response.status_code == 200
+    assert issue.identifier in response.content.decode("utf-8")
+    assert issue.description in response.content.decode("utf-8")

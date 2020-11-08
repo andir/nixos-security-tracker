@@ -1,6 +1,7 @@
 from django.contrib.auth.views import LoginView as AuthLoginView
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.views.generic import DetailView
 
 from .models import Advisory, Issue
 
@@ -22,3 +23,10 @@ def list_advisories(request):
 def list_issues(request):
     issues = Issue.objects.all()
     return render(request, "issues/list.html", dict(issues=issues))
+
+
+class IssueDetail(DetailView):
+    model = Issue
+    slug_field = "identifier"
+    slug_url_kwarg = "identifier"
+    template_name = "issues/detail.html"
