@@ -1,6 +1,6 @@
 { pkgs ? import ./nix }:
 let
-  src = pkgs.nix-gitignore.gitignoreSource [ "*.nix" ] ./.;
+  src = pkgs.nix-gitignore.gitignoreSource [ "*.nix" ".github" ] ./.;
   pkg = pkgs.poetry2nix.mkPoetryApplication {
     inherit src;
     projectDir = ./.;
