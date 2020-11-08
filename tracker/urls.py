@@ -12,5 +12,5 @@ urlpatterns = [
     path("accounts/", include((auth_urls, "auth"))),
     path("advisories/", view=list_advisories, name="advisories"),
     path("issues/", view=list_issues, name="issues"),
-    path("", view=list_advisories, name="index"),
+    path("", view=index, name="index"),
 ]

@@ -13,8 +13,9 @@ from .factories import AdvisoryFactory, IssueFactory
 
 @pytest.mark.django_db
 def test_index(client):
-    response = client.get(reverse("index"))
+    response = client.get(reverse("index"), follow=True)
     assert response.status_code == 200
+    assert len(response.redirect_chain) == 1
 
 
 @pytest.mark.django_db
@@ -32,10 +33,10 @@ def test_login(client):
     form["username"] = username
     form["password"] = password
 
-    response = client.post(reverse("auth:login"), form)
+    response = client.post(reverse("auth:login"), form, follow=True)
 
     assert auth_get_user(client).is_authenticated
-    assertRedirects(response, reverse("index"))
+    assert response.redirect_chain[0] == (reverse("index"), 302)
 
 
 @pytest.mark.django_db
