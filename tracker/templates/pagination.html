@@ -18,8 +18,8 @@
             <a class="page-link">...</a>
         </li>
         {% else %}
-        <li class="page-item">
-            <a class="page-link{% if page_obj.number == page %} font-weight-bold{% endif %}" href="?page={{ page }}">{{ page }}</a>
+        <li class="page-item{% if page_obj.number == page %} active{% endif %}">
+            <a class="page-link" href="?page={{ page }}">{{ page }}</a>
         </li>
         {% endif %}
         {% endfor %}
