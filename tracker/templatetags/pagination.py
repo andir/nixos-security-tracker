@@ -1,9 +1,13 @@
+from typing import List, Union
+
 from django import template
 
 register = template.Library()
 
 
-def get_page_list(current, total, each_side=2):
+def get_page_list(
+    current: int, total: int, each_side: int = 2
+) -> List[Union[str, int]]:
     # CC-BY-SA 3.0 by Autumn Leonard (https://stackoverflow.com/a/31836340)
 
     if total <= (2 * each_side) + 5:
@@ -25,7 +29,7 @@ def get_page_list(current, total, each_side=2):
 
     pages = []
     if start_page > 1:
-        pages.append("1")
+        pages.append(1)
     if start_page > 2:
         pages.append("...")
     for x in range(start_page, end_page + 1):
@@ -38,5 +42,5 @@ def get_page_list(current, total, each_side=2):
 
 
 @register.simple_tag()
-def page_list(page_obj):
+def page_list(page_obj) -> List[Union[str, int]]:
     return get_page_list(page_obj.number, page_obj.paginator.num_pages)
