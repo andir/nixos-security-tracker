@@ -78,7 +78,7 @@ def test_list_empty_issues(client):
 
 @pytest.mark.django_db
 def test_list_issues(client):
-    issues = IssueFactory.create_batch(100)
+    issues = IssueFactory.create_batch(settings.PAGINATE_BY * 3)
 
     for idx, issue in enumerate(issues):
         if idx % settings.PAGINATE_BY == 0:
