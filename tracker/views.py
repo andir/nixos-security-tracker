@@ -12,6 +12,9 @@ from .tables import IssueTable
 
 class LoginView(AuthLoginView):
     def get_success_url(self):
+        url = self.get_redirect_url()
+        if url:
+            return url
         return reverse("index")
 
 
