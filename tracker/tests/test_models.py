@@ -1,6 +1,7 @@
 import pytest
 from django.db import transaction
 from django.db.utils import IntegrityError
+from django.urls import reverse
 
 from ..models import Advisory, AdvisorySeverity, AdvisoryStatus, Issue
 from .factories import AdvisoryFactory, IssueFactory, PackageFactory
@@ -89,3 +90,11 @@ def test_issue_factory_sets_identifier_and_description():
     i = IssueFactory()
     assert i.identifier and i.identifier != ""
     assert i.description and i.description != ""
+
+
+@pytest.mark.django_db
+def test_issue_get_absolute_url():
+    issue = IssueFactory()
+    assert issue.get_absolute_url() == reverse(
+        "issue_detail", kwargs={"identifier": issue.identifier}
+    )

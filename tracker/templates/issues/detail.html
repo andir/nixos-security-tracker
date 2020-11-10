@@ -4,9 +4,18 @@
 {% endblock %}
 
 {% block "content" %}
-<h1>{{ issue.identifier }}</h1>
+<div class="row">
+    <div class="col-sm-10">
+        <h1>{{ issue.identifier }}</h1>
+    </div>
+    <div class="col-sm-2">
+        <a href="{% url 'issue_edit' issue.identifier %}" class="btn btn-primary float-right">Edit</a>
+    </div>
+</div>
 <dl class="row">
 	<dt class="col-sm-3">Description</dt>
 	<dd class="col-sm-9">{{ issue.description }}</dd>
-</dt>
+	<dt class="col-sm-3">Note</dt>
+	<dd class="col-sm-9">{{ issue.note }}</dd>
+</dl>
 {% endblock %}

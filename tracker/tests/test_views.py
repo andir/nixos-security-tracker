@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from pytest_django.asserts import assertRedirects, assertTemplateUsed
 
-from ..models import Advisory
+from ..models import Advisory, Issue
 from ..views import list_advisories
 from .factories import AdvisoryFactory, IssueFactory
 
@@ -100,9 +100,45 @@ def test_list_issues(client):
 @pytest.mark.django_db
 def test_detail_issue(client):
     issue = IssueFactory()
-    response = client.get(
-        reverse("issue_detail", kwargs={"identifier": issue.identifier})
-    )
+    response = client.get(issue.get_absolute_url())
     assert response.status_code == 200
     assert issue.identifier in response.content.decode("utf-8")
     assert issue.description in response.content.decode("utf-8")
+
+
+@pytest.mark.django_db
+def test_edit_issue_requires_login(client):
+    assert not auth_get_user(client).is_authenticated
+    issue = IssueFactory(note="this is a note")
+    response = client.get(
+        reverse("issue_edit", kwargs={"identifier": issue.identifier})
+    )
+    assert response.status_code == 302  # redirec to login page
+    assert response.url.startswith(reverse("auth:login"))
+
+
+@pytest.mark.django_db
+def test_edit_issue(authenticated_client):
+    issue = IssueFactory(note="this is a note")
+    response = authenticated_client.get(
+        reverse("issue_edit", kwargs={"identifier": issue.identifier})
+    )
+    assert response.status_code == 200
+    assertTemplateUsed(response, "issues/edit.html")
+    assert issue.note in response.content.decode("utf-8")
+
+    assert "form" in response.context
+    form = response.context["form"].initial.copy()
+    form["note"] = "another note"
+
+    response = authenticated_client.post(
+        reverse("issue_edit", kwargs={"identifier": issue.identifier}),
+        form,
+        follow=True,
+    )
+
+    assert response.status_code == 200
+    assert response.redirect_chain[0][0] == issue.get_absolute_url()
+    assert "another note" in response.content.decode("utf-8")
+    issue.refresh_from_db()
+    assert issue.note == "another note"

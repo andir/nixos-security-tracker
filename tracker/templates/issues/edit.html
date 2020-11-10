@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block "title" %}
+{{ issue.identifier }}
+{% endblock %}
+
+{% load bootstrap4 %}
+{% block "content" %}
+<h1>{{ issue.identifier }}</h1>
+
+<dl class="row">
+	<dt class="col-sm-3">Description</dt>
+	<dd class="col-sm-9">{{ issue.description }}</dd>
+</dl>
+<dl class="row">
+    <dt class="col-sm-3">Note</dt>
+    <dd class="col-sm-9">
+        <form action="{% url 'issue_edit' issue.identifier %}" method="post">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            {% buttons %}
+                <a href="{% url 'issue_detail' issue.identifier %}" class="btn btn-secondary">Back</a>
+                <button type="submit" class="btn btn-primary">Save</button>
+            {% endbuttons %}
+        </form>
+    </dd>
+</dl>
+{% endblock %}

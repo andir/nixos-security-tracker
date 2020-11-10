@@ -1,8 +1,9 @@
 from django.conf import settings
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView as AuthLoginView
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from django.views.generic import DetailView
+from django.views.generic import DetailView, UpdateView
 from django_tables2 import SingleTableView
 
 from .models import Advisory, Issue
@@ -35,3 +36,12 @@ class IssueDetail(DetailView):
     slug_field = "identifier"
     slug_url_kwarg = "identifier"
     template_name = "issues/detail.html"
+
+
+class IssueEdit(LoginRequiredMixin, UpdateView):
+    model = Issue
+    slug_field = "identifier"
+    slug_url_kwarg = "identifier"
+    template_name = "issues/edit.html"
+
+    fields = ["note"]
