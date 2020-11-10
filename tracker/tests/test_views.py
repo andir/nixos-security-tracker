@@ -21,6 +21,24 @@ def test_index(client):
 
 
 @pytest.mark.django_db
+def test_login_button_visible(client):
+    """
+    Unauthenticated users should be presented with a login link.
+    """
+    response = client.get(reverse("index"), follow=True)
+    assert reverse("auth:login") in response.content.decode("utf-8")
+
+
+@pytest.mark.django_db
+def test_logout_button_visible(authenticated_client):
+    """
+    Authenticated users should be presented with a logout link.
+    """
+    response = authenticated_client.get(reverse("index"), follow=True)
+    assert reverse("auth:logout") in response.content.decode("utf-8")
+
+
+@pytest.mark.django_db
 def test_login(client):
     response = client.get(reverse("auth:login"))
     assert response.status_code == 200
