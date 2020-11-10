@@ -48,3 +48,8 @@ class IssueEdit(LoginRequiredMixin, UpdateView):
     template_name = "issues/edit.html"
 
     fields = ["note"]
+
+
+class IssueHistoryList(SingleTableView):
+    model = Issue.history.model
+    template_name = "issues/list.html"  # fixme

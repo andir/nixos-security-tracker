@@ -98,3 +98,29 @@ def test_issue_get_absolute_url():
     assert issue.get_absolute_url() == reverse(
         "issue_detail", kwargs={"identifier": issue.identifier}
     )
+
+
+@pytest.mark.django_db
+def test_issue_records_history():
+    i = IssueFactory(identifier="records history identifier")
+    i.identifier += " some suffix"
+    i.save()
+    assert i.history.count() == 2
+    assert i.history.first().identifier == i.identifier
+    assert i.history.last().identifier == "records history identifier"
+
+
+@pytest.mark.django_db
+def test_issue_history_diffable():
+    i = IssueFactory(identifier="diffable history identifier")
+    i.note = "some note"
+    i.save()
+
+    current_version = i.history.first()
+    old_version = i.history.last()
+
+    diff = current_version.diff_against(old_version)
+    assert len(diff.changes) == 1
+    assert diff.changes[0].field == "note"
+    assert diff.changes[0].old == ""
+    assert diff.changes[0].new == "some note"

@@ -2,6 +2,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from simple_history.models import HistoricalRecords
 
 
 class Release(models.Model):
@@ -67,6 +68,8 @@ class Issue(models.Model):
     description = models.TextField(blank=True, help_text="A description for this issue")
     packages = models.ManyToManyField(Package, through="PackageAdvisoryStatus")
     note = models.TextField(blank=True, help_text="A note regarding this issue")
+
+    history = HistoricalRecords()
 
     def get_absolute_url(self):
         return reverse("issue_detail", kwargs={"identifier": self.identifier})

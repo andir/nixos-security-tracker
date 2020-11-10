@@ -1,7 +1,15 @@
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
 
-from .views import IssueDetail, IssueList, IssueEdit, LoginView, index, list_advisories
+from .views import (
+    IssueDetail,
+    IssueEdit,
+    IssueHistoryList,
+    IssueList,
+    LoginView,
+    index,
+    list_advisories,
+)
 
 auth_urls = [
     path("login/", LoginView.as_view(), name="login"),
@@ -14,5 +22,10 @@ urlpatterns = [
     path("issues/", IssueList.as_view(), name="issues"),
     path("issues/<str:identifier>", IssueDetail.as_view(), name="issue_detail"),
     path("issues/<str:identifier>/edit", IssueEdit.as_view(), name="issue_edit"),
+    path(
+        "issues/<str:identifier>/history",
+        IssueHistoryList.as_view(),
+        name="issue_history",
+    ),
     path("", view=index, name="index"),
 ]
