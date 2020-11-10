@@ -1,6 +1,5 @@
 from factory import Sequence, SubFactory
 from factory.django import DjangoModelFactory
-
 from tracker import models
 
 

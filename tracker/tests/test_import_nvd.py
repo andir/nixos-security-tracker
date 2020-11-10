@@ -6,7 +6,6 @@ from unittest.mock import MagicMock, call, patch
 import pytest
 import requests
 from django.core.management import call_command
-
 from tracker.models import Issue
 
 FIXTURE_DIR = Path(

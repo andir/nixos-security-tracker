@@ -6,7 +6,6 @@ from typing import BinaryIO, Dict
 
 import requests
 from django.core.management.base import BaseCommand
-
 from tracker.models import Issue
 
 

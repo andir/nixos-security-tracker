@@ -8,8 +8,8 @@ let
       black.enable = true;
       isort = {
         enable = true;
-        entry = "${pkgs.python3Packages.isort}/bin/isort --apply --atomic";
-        pass_filenames = false;
+        entry = "${env}/bin/isort --apply --atomic";
+        pass_filenames = true;
       };
       django-migration-check = {
         enable = true;
