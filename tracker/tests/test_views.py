@@ -81,6 +81,7 @@ def test_list_empty_issues(client):
 def test_list_issues(client):
     num_pages = 3
     issues = IssueFactory.create_batch(settings.PAGINATE_BY * num_pages)
+    issues.sort(key=lambda issue: issue.identifier)
 
     i = iter(issues)
     slices = [itertools.islice(iter(i), settings.PAGINATE_BY) for _ in range(num_pages)]

@@ -55,6 +55,25 @@ def test_issue_requires_identifier():
 
 
 @pytest.mark.django_db
+def test_issue_sort_order():
+    """
+    Issues should by default be sorted by the identifier.
+    """
+
+    issues = [
+        IssueFactory(identifier="ZZZZZ"),
+        IssueFactory(identifier="AAAAA"),
+        IssueFactory(identifier="DDDDD"),
+    ]
+
+    print(issues)
+    q = Issue.objects.filter(pk__in=[i.pk for i in issues])
+    assert q.first().identifier == "AAAAA"
+    assert q[1].identifier == "DDDDD"
+    assert q.last().identifier == "ZZZZZ"
+
+
+@pytest.mark.django_db
 def test_issue_identifier_must_be_unique():
     identifier = "unique-issue-identifier"
     i1 = Issue(identifier=identifier)

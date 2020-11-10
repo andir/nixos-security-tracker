@@ -67,6 +67,9 @@ class Issue(models.Model):
     packages = models.ManyToManyField(Package, through="PackageAdvisoryStatus")
     note = models.TextField(blank=True, help_text="A note regarding this issue")
 
+    class Meta:
+        ordering = ("identifier",)
+
 
 #########################################################
 
