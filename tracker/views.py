@@ -1,9 +1,12 @@
+from django.conf import settings
 from django.contrib.auth.views import LoginView as AuthLoginView
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import DetailView
+from django_tables2 import SingleTableView
 
 from .models import Advisory, Issue
+from .tables import IssueTable
 
 
 class LoginView(AuthLoginView):
@@ -20,9 +23,11 @@ def list_advisories(request):
     return render(request, "advisories/list.html", dict(advisories=advisories))
 
 
-def list_issues(request):
-    issues = Issue.objects.all()
-    return render(request, "issues/list.html", dict(issues=issues))
+class IssueList(SingleTableView):
+    model = Issue
+    table_class = IssueTable
+    paginate_by = settings.PAGINATE_BY
+    template_name = "issues/list.html"
 
 
 class IssueDetail(DetailView):
