@@ -1,7 +1,7 @@
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
 
-from .views import IssueDetail, LoginView, index, list_advisories, list_issues
+from .views import IssueDetail, IssueList, LoginView, index, list_advisories
 
 auth_urls = [
     path("login/", LoginView.as_view(), name="login"),
@@ -11,7 +11,7 @@ auth_urls = [
 urlpatterns = [
     path("accounts/", include((auth_urls, "auth"))),
     path("advisories/", view=list_advisories, name="advisories"),
-    path("issues/", view=list_issues, name="issues"),
+    path("issues/", IssueList.as_view(), name="issues"),
     path("issues/<str:identifier>", IssueDetail.as_view(), name="issue_detail"),
     path("", view=index, name="index"),
 ]

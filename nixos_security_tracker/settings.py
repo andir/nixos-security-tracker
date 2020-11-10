@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "tracker",
     "bootstrap4",
+    "django_tables2",
 ]
 
 MIDDLEWARE = [
@@ -124,3 +125,6 @@ STATIC_ROOT = os.getenv("NIXOS_SECURITY_TRACKER_STATIC_ROOT")
 
 # FIXME: serve the CSS & JavaScript files locally instead of pointing at some CDN
 BOOTSTRAP4 = {}
+
+# Number of items per page in list and table views
+PAGINATE_BY = 15
