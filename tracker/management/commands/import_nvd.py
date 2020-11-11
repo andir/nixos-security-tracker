@@ -31,6 +31,7 @@ class Command(BaseCommand):
             ]
 
         for url in urls:
+            self.stdout.write(self.style.NOTICE(f"Loading {url}"))
             response = requests.get(url, stream=True)
             assert response.status_code == 200
             data = gzip_decompress(response.raw)
