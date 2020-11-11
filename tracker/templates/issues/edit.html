@@ -23,7 +23,10 @@
 
 <dl class="row">
 	<dt class="col-sm-3">Status</dt>
-    <dd class="col-sm-9">{% bootstrap_field form.status show_label=False %}</dd>
+    <dd class="col-sm-9">
+        {% bootstrap_field form.status show_label=False %}
+        {% bootstrap_field form.status_reason show_label=False %}
+    </dd>
 </dl>
 <dl class="row">
 	<dt class="col-sm-3">Description</dt>

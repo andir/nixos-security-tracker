@@ -52,7 +52,7 @@ class IssueEdit(LoginRequiredMixin, UpdateView):
     slug_url_kwarg = "identifier"
     template_name = "issues/edit.html"
 
-    fields = ["status", "note"]
+    fields = ["status", "status_reason", "note"]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

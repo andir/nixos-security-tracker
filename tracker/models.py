@@ -46,6 +46,9 @@ class Issue(models.Model):
         max_length=max(len(x[0]) for x in IssueStatus.choices),
         help_text="The status the issue is currently in",
     )
+    status_reason = models.CharField(
+        max_length=256, blank=True, help_text="A short explanation for the status"
+    )
     description = models.TextField(blank=True, help_text="A description for this issue")
     note = models.TextField(blank=True, help_text="A note regarding this issue")
 
