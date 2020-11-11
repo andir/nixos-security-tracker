@@ -10,7 +10,7 @@ from pytest_django.asserts import assertRedirects, assertTemplateUsed
 
 from ..models import Advisory, Issue
 from ..views import list_advisories
-from .factories import AdvisoryFactory, IssueFactory
+from .factories import AdvisoryFactory, IssueFactory, IssueReferenceFactory
 
 
 @pytest.mark.django_db
@@ -118,10 +118,13 @@ def test_list_issues(client):
 @pytest.mark.django_db
 def test_detail_issue(client):
     issue = IssueFactory()
+    reference = IssueReferenceFactory(issue=issue)
     response = client.get(issue.get_absolute_url())
     assert response.status_code == 200
-    assert issue.identifier in response.content.decode("utf-8")
-    assert issue.description in response.content.decode("utf-8")
+    content = response.content.decode("utf-8")
+    assert issue.identifier in content
+    assert issue.description in content
+    assert reference.uri in content
 
 
 @pytest.mark.django_db

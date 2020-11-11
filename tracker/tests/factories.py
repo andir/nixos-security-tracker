@@ -12,6 +12,14 @@ class IssueFactory(DjangoModelFactory):
     description = Sequence(lambda n: f"description {n}")
 
 
+class IssueReferenceFactory(DjangoModelFactory):
+    class Meta:
+        model = models.IssueReference
+
+    issue = SubFactory(IssueFactory)
+    uri = Sequence(lambda n: f"http://example.com/?reference={n}")
+
+
 class AdvisoryFactory(DjangoModelFactory):
     class Meta:
         model = models.Advisory

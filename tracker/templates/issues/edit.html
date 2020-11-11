@@ -30,6 +30,14 @@
 	<dd class="col-sm-9">{{ issue.description }}</dd>
 </dl>
 <dl class="row">
+	<dt class="col-sm-3">References</dt>
+	<dd class="col-sm-9">
+        {% for reference in references %}
+        {{ reference.uri | urlize }}<br />
+        {% endfor %}
+    </dd>
+</dl>
+<dl class="row">
     <dt class="col-sm-3">Note</dt>
     <dd class="col-sm-9">{% bootstrap_field form.note show_label=False %}</dd>
 </dl>

@@ -4,6 +4,22 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
+class IssueReference(models.Model):
+    """
+    Additional references for issues
+    """
+
+    issue = models.ForeignKey(
+        "Issue",
+        help_text="Issue this reference ",
+        on_delete=models.CASCADE,
+        related_name="references",
+    )
+    uri = models.TextField(
+        blank=False, null=False, help_text="URI for additional resources for an issue"
+    )
+
+
 class IssueStatus(models.TextChoices):
     UNKNOWN = "UNKNOWN", _("unknown")
     AFFECTED = "AFFECTED", _("affected")
