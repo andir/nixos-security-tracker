@@ -7,6 +7,8 @@ pkgs.nixosTest {
 
       # use one static file for the NVD dataset that is imported
       systemd.services.nixos-security-tracker-update.environment.NIXOS_SECURITY_TRACKER_NVD_URLS = "http://localhost/nvd-data.json.gz";
+      systemd.services.nixos-security-tracker-update-recent.environment.NIXOS_SECURITY_TRACKER_NVD_URLS = "http://localhost/nvd-data.json.gz";
+
       services.nginx = {
         enable = true;
         virtualHosts.localhost.locations."=/nvd-data.json.gz" = {

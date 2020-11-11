@@ -110,7 +110,33 @@ in
             StateDirectory = "nixos-security-tracker";
             PrivateTmp = true;
           };
+        };
 
+        nixos-security-tracker-update-recent = lib.mkIf cfg.scheduleNVDUpdates {
+          path = [
+            pkgs.nixos-security-tracker.manage
+            pkgs.nixos-security-tracker.env
+          ];
+          environment = {
+            ENVFILE = toString envFile;
+          };
+
+          after = lib.mkIf cfg.runMigrations [ "nixos-security-tracker-migrate.service" ];
+          requires = lib.mkIf cfg.runMigrations [ "nixos-security-tracker-migrate.service" ];
+
+          script = ''
+            source $ENVFILE
+            exec manage import_nvd https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-recent.json.gz
+          '';
+
+          startAt = "hourly"; # FIXME: make configurable
+
+          serviceConfig = {
+            Type = "oneshot";
+            DynamicUser = true;
+            StateDirectory = "nixos-security-tracker";
+            PrivateTmp = true;
+          };
         };
 
         nixos-security-tracker = {
