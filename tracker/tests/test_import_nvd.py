@@ -8,7 +8,7 @@ import requests
 from django.core.management import call_command
 from freezegun import freeze_time
 
-from tracker.models import Issue
+from tracker.models import Issue, IssueReference
 
 FIXTURE_DIR = Path(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), "fixtures")
@@ -54,16 +54,33 @@ def test_import_nvd(request_get, mocked_nvd_response):
         (
             "CVE-1999-0001",
             "ip_input.c in BSD-derived TCP/IP implementations allows remote attackers to cause a denial of service (crash or hang) via crafted packets.",
+            [
+                "http://www.openbsd.org/errata23.html#tcpfix",
+                "http://www.osvdb.org/5707",
+            ],
         ),
         (
             "CVE-2002-2446",
             "GE Healthcare Millennium MG, NC, and MyoSIGHT has a password of insite.genieacq for the insite account that cannot be changed without disabling product functionality for remote InSite support, which has unspecified impact and attack vectors.",
+            [
+                "http://apps.gehealthcare.com/servlet/ClientServlet/2338955-100.pdf?REQ=RAA&DIRECTION=2338955-100&FILENAME=2338955-100.pdf&FILEREV=1&DOCREV_ORG=1",
+                "http://apps.gehealthcare.com/servlet/ClientServlet/2354459-100.pdf?REQ=RAA&DIRECTION=2354459-100&FILENAME=2354459-100.pdf&FILEREV=4&DOCREV_ORG=4",
+                "http://www.forbes.com/sites/thomasbrewster/2015/07/10/vulnerable-breasts/",
+                "https://ics-cert.us-cert.gov/advisories/ICSMA-18-037-02",
+                "https://twitter.com/digitalbond/status/619250429751222277",
+            ],
         ),
     ]
-    for (identifier, description) in expected_identifiers:
-        obj = Issue.objects.get(identifier=identifier)
-        assert obj, f"Issue {identifier} must exist in the database"
-        assert obj.description == description
+    for (identifier, description, references) in expected_identifiers:
+        issue = Issue.objects.get(identifier=identifier)
+        assert issue, f"Issue {identifier} must exist in the database"
+        assert issue.description == description
+
+        persisted_references = [
+            reference.uri for reference in IssueReference.objects.filter(issue=issue)
+        ]
+        for reference in references:
+            assert reference in persisted_references
 
 
 @patch("requests.get")
@@ -117,6 +134,45 @@ def test_import_nvd_updates_description(request_get, mocked_nvd_response):
 
     issue = Issue.objects.get(identifier=identifier)
     assert issue.description == expected_description
+
+
+@patch("requests.get")
+@pytest.mark.django_db
+def test_import_nvd_removes_references(request_get, mocked_nvd_response):
+    identifier = "CVE-1999-0001"
+    issue = Issue.objects.create(identifier=identifier)
+    IssueReference.objects.create(issue=issue, uri="please remove me")
+
+    references = (
+        IssueReference.objects.filter(issue=issue).values_list("uri", flat=True).all()
+    )
+    assert "please remove me" in references
+
+    request_get.return_value = mocked_nvd_response
+    call_command("import_nvd", "http://somewhere")
+
+    references = (
+        IssueReference.objects.filter(issue=issue).values_list("uri", flat=True).all()
+    )
+    assert "please remove me" not in references
+
+
+@patch("requests.get")
+@pytest.mark.django_db
+def test_import_nvd_adds_missing_references(request_get, mocked_nvd_response):
+    identifier = "CVE-1999-0001"
+    issue = Issue.objects.create(identifier=identifier)
+
+    assert IssueReference.objects.filter(issue=issue).count() == 0
+
+    request_get.return_value = mocked_nvd_response
+    call_command("import_nvd", "http://somewhere")
+
+    references = (
+        IssueReference.objects.filter(issue=issue).values_list("uri", flat=True).all()
+    )
+    assert "http://www.openbsd.org/errata23.html#tcpfix" in references
+    assert "http://www.osvdb.org/5707" in references
 
 
 @patch("requests.get")
