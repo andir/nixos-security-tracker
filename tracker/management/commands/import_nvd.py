@@ -6,6 +6,7 @@ from typing import BinaryIO, Dict
 
 import requests
 from django.core.management.base import BaseCommand
+
 from tracker.models import Issue
 
 
@@ -24,9 +25,9 @@ class Command(BaseCommand):
             urls = env_urls.split(";")
 
         if not urls:
-            url = [
+            urls = [
                 f"https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-{year}.json.gz"
-                for year in range(2002, datetime.date.today().year)
+                for year in range(2002, datetime.date.today().year + 1)
             ]
 
         for url in urls:

@@ -26,6 +26,7 @@ bpython = "^0.20"
 uvicorn = {extras = ["standard"], version = "^0.12.2"}
 selenium = "^3.141.0"
 isort = "^5.6.4"
+freezegun = "^1.0.0"
 
 [tool.poetry.scripts]
 # value needs a colon (:)

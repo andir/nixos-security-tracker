@@ -6,6 +6,8 @@ from unittest.mock import MagicMock, call, patch
 import pytest
 import requests
 from django.core.management import call_command
+from freezegun import freeze_time
+
 from tracker.models import Issue
 
 FIXTURE_DIR = Path(
@@ -115,3 +117,28 @@ def test_import_nvd_updates_description(request_get, mocked_nvd_response):
 
     issue = Issue.objects.get(identifier=identifier)
     assert issue.description == expected_description
+
+
+@patch("requests.get")
+@pytest.mark.django_db
+@freeze_time("2003-01-01")
+def test_import_nvd_falls_back_to_timerange(request_get):
+    """
+    Assert that the import script falls back to using the date range to today
+    for the import. The first NVD database is from 2002 so this test is
+    supposed to cause two requests.
+    """
+    request_get.side_effect = [mocked_nvd_response(), mocked_nvd_response()]
+    call_command("import_nvd")
+    request_get.assert_has_calls(
+        [
+            call(
+                "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-2002.json.gz",
+                stream=True,
+            ),
+            call(
+                "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-2003.json.gz",
+                stream=True,
+            ),
+        ]
+    )
