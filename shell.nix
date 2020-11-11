@@ -44,7 +44,6 @@ pkgs.mkShell {
     pkgs.python3Packages.black
     pkgs.python3Packages.mypy
     pkgs.python3Packages.flake8
-    pkgs.python3Packages.isort
     pkgs.geckodriver
     pkgs.firefox
     test-runner

@@ -24,7 +24,7 @@
     </ul>
 
     <ul class="navbar-nav ml-auto">
-        {% if is_authenticated %}
+        {% if user.is_authenticated %}
         <li class="nav-item">
             <a class="nav-link{% active "logout" %}" href="{% url "auth:logout" %}">Logout</a>
         </li>
