@@ -25,13 +25,13 @@ pkgs.nixosTest {
     with subtest("NVD import"):
         # at first there must be no errors and no CVE's
         server.succeed("curl -s --fail localhost/issues/")
-        server.succeed("curl -s --fail localhost/issues/ | grep -qv CVE-2002")
+        server.succeed("curl -s --fail localhost/issues/ | grep -qv CVE-")
 
         # run the update & wait until it finishes
         server.systemctl("start --wait nixos-security-tracker-update.service")
 
-        # now there should not be any errors and we must also be able to find a CVE from 2002
+        # now there should not be any errors and we must also be able to find a CVE
         server.succeed("curl -s --fail localhost/issues/")
-        server.succeed("curl -s --fail localhost/issues/ | grep -q CVE-2002")
+        server.succeed("curl -s --fail localhost/issues/ | grep -q CVE-")
   '';
 }
