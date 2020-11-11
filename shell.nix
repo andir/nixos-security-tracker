@@ -13,7 +13,7 @@ let
       };
       django-migration-check = {
         enable = true;
-        entry = "${env}/bin/python manage.py makemigrations --check";
+        entry = "${env}/bin/python manage.py makemigrations --check --dry-run";
         pass_filenames = false;
       };
       editorconfig = {
