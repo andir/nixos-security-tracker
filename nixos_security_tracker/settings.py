@@ -30,6 +30,7 @@ DEBUG = True
 
 ALLOWED_HOSTS: List[str] = ["localhost", "127.0.0.1", "::1"]
 
+INTERNAL_IPS: List[str] = ["127.0.0.1", "::1"]
 
 # Application definition
 
@@ -45,6 +46,9 @@ INSTALLED_APPS = [
     "django_tables2",
 ]
 
+if DEBUG:
+    INSTALLED_APPS.append("debug_toolbar")
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -54,6 +58,12 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+if DEBUG:
+    # append the django-debug-toolbar middleware as early as possible but after
+    # response compressors such as GZipMiddleware
+    # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#enabling-middleware
+    MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware"] + MIDDLEWARE
 
 ROOT_URLCONF = "nixos_security_tracker.urls"
 
