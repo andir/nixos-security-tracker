@@ -47,4 +47,4 @@ class IssueEdit(LoginRequiredMixin, UpdateView):
     slug_url_kwarg = "identifier"
     template_name = "issues/edit.html"
 
-    fields = ["note"]
+    fields = ["status", "note"]

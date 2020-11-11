@@ -13,9 +13,15 @@
     </div>
 </div>
 <dl class="row">
+    <dt class="col-sm-3">Status</dt>
+    <dd class="col-sm-9">{{ issue.status }}</dd>
+</dl>
+<dl class="row">
 	<dt class="col-sm-3">Description</dt>
 	<dd class="col-sm-9">{{ issue.description }}</dd>
-	<dt class="col-sm-3">Note</dt>
-	<dd class="col-sm-9">{{ issue.note }}</dd>
+</dl>
+<dl class="row">
+	<dt class="col-sm-3">Notes</dt>
+	<dd class="col-sm-9">{{ issue.note | urlize | linebreaks }}</dd>
 </dl>
 {% endblock %}

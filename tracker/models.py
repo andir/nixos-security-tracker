@@ -4,6 +4,14 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
+class IssueStatus(models.TextChoices):
+    UNKNOWN = "UNKNOWN", _("unknown")
+    AFFECTED = "AFFECTED", _("affected")
+    NOTAFFECTED = "NOTAFFECTED", _("notaffected")
+    NOTFORUS = "NOTFORUS", _("notforus")
+    WONTFIX = "WONTFIX", _("wontfix")
+
+
 class Issue(models.Model):
     """
     A single issue with one or more packages.
@@ -15,6 +23,12 @@ class Issue(models.Model):
         blank=False,
         unique=True,
         default=None,
+    )
+    status = models.CharField(
+        choices=IssueStatus.choices,
+        default=IssueStatus.UNKNOWN,
+        max_length=max(len(x[0]) for x in IssueStatus.choices),
+        help_text="The status the issue is currently in",
     )
     description = models.TextField(blank=True, help_text="A description for this issue")
     note = models.TextField(blank=True, help_text="A note regarding this issue")
