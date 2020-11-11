@@ -18,7 +18,7 @@ requests = "^2.24.0"
 django-tables2 = "^2.3.3"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
+pytest = "^6.1"
 pytest-django = "^4.1.0"
 django-stubs = "^1.7.0"
 factory-boy = "^3.1.0"
