@@ -49,5 +49,7 @@ pkgs.mkShell {
     test-runner
   ];
 
+  NIXOS_SECURITY_TRACKER_DEBUG = "1";
+
   inherit (pre-commit-hooks) shellHook;
 }
