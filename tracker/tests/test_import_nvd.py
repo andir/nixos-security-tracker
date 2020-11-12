@@ -27,7 +27,7 @@ def nvd_json_data_fixture():
 
 
 def nvd_json_data():
-    return open(FIXTURE_DIR / "nvdcve-1.1-2002.json.gz", "rb")
+    return open(FIXTURE_DIR / "nvdcve-1.1-2002-stripped.json.gz", "rb")
 
 
 def mocked_nvd_response():
