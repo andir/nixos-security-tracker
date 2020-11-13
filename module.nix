@@ -1,6 +1,8 @@
 { pkgs, lib, config, ... }:
 let
   cfg = config.services.nixos-security-tracker;
+
+  haveLocalPostgresql = cfg.database == "postgresql" && (cfg.postgresqlHost == "localhost" || cfg.postgresqlHost == "");
 in
 {
   options = {
@@ -12,6 +14,30 @@ in
         description = ''
           Whether migrations should be run on startup.
         '';
+      };
+      database = lib.mkOption {
+        type = lib.types.enum [ "sqlite" "postgresql" ];
+        default = "sqlite";
+      };
+      postgresqlHost = lib.mkOption {
+        type = lib.types.str;
+        default = "";
+      };
+      postgresqlUser = lib.mkOption {
+        type = lib.types.str;
+        default = "nixos_security_tracker";
+      };
+      postgresqlPort = lib.mkOption {
+        type = lib.types.str;
+        default = "";
+      };
+      postgresqlSchemaName = lib.mkOption {
+        type = lib.types.str;
+        default = "nixos_security_tracker";
+      };
+      postgresqlPasswordFile = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
       };
       scheduleNVDUpdates = lib.mkOption {
         type = lib.types.bool;
@@ -43,6 +69,26 @@ in
       })
     ];
 
+    services.postgresql = lib.mkIf haveLocalPostgresql {
+      enable = true;
+      identMap = ''
+        nixos-security-tracker nixos-security-tracker ${cfg.postgresqlUser}
+      '';
+      authentication = ''
+        local ${cfg.postgresqlSchemaName} all ident map=nixos-security-tracker
+      '';
+      ensureDatabases = [ cfg.postgresqlSchemaName ];
+      ensureUsers = [
+        {
+          name = "${cfg.postgresqlUser}";
+          ensurePermissions = {
+            "DATABASE ${cfg.postgresqlSchemaName}" = "ALL PRIVILEGES";
+          };
+        }
+      ];
+
+    };
+
     services.nginx.virtualHosts.${cfg.virtualHost} = {
       locations."/".proxyPass = "http://unix:/run/nixos-security-tracker/gunicorn.sock";
       locations."/static/" = {
@@ -59,13 +105,31 @@ in
 
     systemd.services =
       let
-        envFile = pkgs.writeText "env" ''
+        envFile = pkgs.writeText "env" (if cfg.database == "sqlite" then ''
+          export NIXOS_SECURITY_TRACKER_DATABASE_TYPE="sqlite"
           export NIXOS_SECURITY_TRACKER_DATABASE_NAME="$STATE_DIRECTORY/database.sqlite"
-        '';
+        '' else if cfg.database == "postgresql" then ''
+          export NIXOS_SECURITY_TRACKER_DATABASE_TYPE="postgresql"
+          export NIXOS_SECURITY_TRACKER_DATABASE_NAME="${cfg.postgresqlSchemaName}"
+          export NIXOS_SECURITY_TRACKER_DATABASE_HOST="${cfg.postgresqlHost}"
+          export NIXOS_SECURITY_TRACKER_DATABASE_USER="${cfg.postgresqlUser}"
+          export NIXOS_SECURITY_TRACKER_DATABASE_PORT="${cfg.postgresqlPort}"
+          ${lib.optionalString (cfg.postgresqlPasswordFile != null) ''
+            export NIXOS_SECURITY_TRACKER_DATABASE_PASSWORD="$(<${cfg.postgresqlPasswordFile})"
+          ''}
+        '' else throw "unexpected database type ${cfg.database}");
       in
       {
+
         nixos-security-tracker-migrate = lib.mkIf cfg.runMigrations {
           wantedBy = [ "multi-user.target" ];
+          after = lib.mkIf haveLocalPostgresql [
+            "postgresql.service"
+          ];
+          requires = lib.mkIf haveLocalPostgresql [
+            "postgresql.service"
+          ];
+
           path = [
             pkgs.nixos-security-tracker.manage
           ];
@@ -78,6 +142,7 @@ in
           '';
           serviceConfig = {
             Type = "oneshot";
+            User = "nixos-security-tracker";
             DynamicUser = true;
             RemainAfterExit = true;
             StateDirectory = "nixos-security-tracker";
@@ -107,6 +172,7 @@ in
           serviceConfig = {
             Type = "oneshot";
             DynamicUser = true;
+            User = "nixos-security-tracker";
             StateDirectory = "nixos-security-tracker";
             PrivateTmp = true;
           };
@@ -133,6 +199,7 @@ in
 
           serviceConfig = {
             Type = "oneshot";
+            User = "nixos-security-tracker";
             DynamicUser = true;
             StateDirectory = "nixos-security-tracker";
             PrivateTmp = true;
@@ -160,6 +227,7 @@ in
             ExecReload = "${pkgs.coreutils}/bin/kill -s HUP $MAINPID";
             Type = "notify";
             DynamicUser = true;
+            User = "nixos-security-tracker";
             StateDirectory = "nixos-security-tracker";
             PrivateTmp = true;
           };
