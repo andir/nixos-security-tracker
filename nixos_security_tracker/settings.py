@@ -89,14 +89,30 @@ WSGI_APPLICATION = "nixos_security_tracker.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASES = {
-    "default": {
+_db_type = os.getenv("NIXOS_SECURITY_TRACKER_DATABASE_TYPE", "sqlite")
+
+DATABASES = {}
+
+if _db_type == "sqlite":
+    DATABASES["default"] = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": os.getenv(
             "NIXOS_SECURITY_TRACKER_DATABASE_NAME", BASE_DIR / "db.sqlite3"
         ),
     }
-}
+elif _db_type == "postgresql":
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": os.getenv(
+            "NIXOS_SECURITY_TRACKER_DATABASE_NAME", "nixos_security_tracker"
+        ),
+        "USER": os.getenv(
+            "NIXOS_SECURITY_TRACKER_DATABASE_USER", "nixos_security_tracker"
+        ),
+        "HOST": os.getenv("NIXOS_SECURITY_TRACKER_DATABASE_HOST", "localhost"),
+        "PASSWORD": os.getenv("NIXOS_SECURITY_TRACKER_DATABASE_PASSWORD", ""),
+        "PORT": os.getenv("NIXOS_SECURITY_TRACKER_DATABASE_PORT", ""),
+    }
 
 
 # Password validation
