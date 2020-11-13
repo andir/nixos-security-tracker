@@ -22,6 +22,8 @@ jobs:
         with:
           nixbuild_ssh_key: ${{ secrets.nixbuild_ssh_key }}
       - run: nix-build
+      - run: nix-build -A staticFiles
+      - run: nix-build -A manage
   instantiate-vm-test:
     # only instantiate but do not run/build the test as there is currently no way to use
     # KVM on neither GitHub Actions nor nixbuild.net

@@ -4,52 +4,28 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
-class Release(models.Model):
+class IssueReference(models.Model):
     """
-    A NixOS release
-    """
-
-    alive = models.BooleanField(
-        default=False, help_text="The release is still supported"
-    )
-
-
-class SCMRevision(models.Model):
-    """
-    A unique version in the SCM repository
+    Additional references for issues
     """
 
-    identifier = models.CharField(
-        max_length=255, help_text="The revision in the SCM repository"
-    )
-    release = models.ForeignKey(
-        Release,
+    issue = models.ForeignKey(
+        "Issue",
+        help_text="Issue this reference ",
         on_delete=models.CASCADE,
-        help_text="The release this revision belongs to",
+        related_name="references",
+    )
+    uri = models.TextField(
+        blank=False, null=False, help_text="URI for additional resources for an issue"
     )
 
 
-class Package(models.Model):
-    """
-    A version of a package. e.g. python-2.7a1
-    """
-
-    revision = models.ForeignKey(
-        SCMRevision,
-        on_delete=models.CASCADE,
-        help_text="The revision this package appeard in",
-    )
-    attribute_name = models.CharField(
-        max_length=255, help_text="The name of the package"
-    )
-    name = models.CharField(max_length=255, help_text="The name of the package")
-    version = models.CharField(max_length=100, help_text="The version of the package")
-
-    patches = models.ManyToManyField("Patch")
-
-
-class Patch(models.Model):
-    filename = models.CharField(max_length=256, help_text="Name of the patch file")
+class IssueStatus(models.TextChoices):
+    UNKNOWN = "UNKNOWN", _("unknown")
+    AFFECTED = "AFFECTED", _("affected")
+    NOTAFFECTED = "NOTAFFECTED", _("notaffected")
+    NOTFORUS = "NOTFORUS", _("notforus")
+    WONTFIX = "WONTFIX", _("wontfix")
 
 
 class Issue(models.Model):
@@ -64,8 +40,16 @@ class Issue(models.Model):
         unique=True,
         default=None,
     )
+    status = models.CharField(
+        choices=IssueStatus.choices,
+        default=IssueStatus.UNKNOWN,
+        max_length=max(len(x[0]) for x in IssueStatus.choices),
+        help_text="The status the issue is currently in",
+    )
+    status_reason = models.CharField(
+        max_length=256, blank=True, help_text="A short explanation for the status"
+    )
     description = models.TextField(blank=True, help_text="A description for this issue")
-    packages = models.ManyToManyField(Package, through="PackageAdvisoryStatus")
     note = models.TextField(blank=True, help_text="A note regarding this issue")
 
     def get_absolute_url(self):
@@ -141,27 +125,3 @@ class Advisory(models.Model):
         """
 
         return text
-
-
-class PackageIssueStatus(models.TextChoices):
-    UNKNOWN = "unknown", _("unknown")
-    FIXED = "fixed", _("fixed")
-    UNAFFECTED = "unaffected", _("unaffected")
-    VULNERABLE = "vulnerable", _("vulnerable")
-
-
-class PackageAdvisoryStatus(models.Model):
-    issue = models.ForeignKey("Issue", on_delete=models.CASCADE)
-    package = models.ForeignKey("Package", on_delete=models.CASCADE)
-
-    status = models.CharField(
-        choices=PackageIssueStatus.choices,
-        default=PackageIssueStatus.UNKNOWN,
-        max_length=max(len(x[0]) for x in PackageIssueStatus.choices),
-        help_text="Status of the issue in the package.",
-    )
-    confirmed = models.BooleanField(
-        default=False,
-        help_text="Whether this issue status has been confirmed by a human.",
-    )
-    note = models.TextField(blank=True, help_text="A note regarding this issue")

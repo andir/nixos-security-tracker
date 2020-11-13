@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "f6^k0bber_b@!akwx3r58e6dilb-*i6yi13+r=vzb_%j)wq1r!"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(os.getenv("NIXOS_SECURITY_TRACKER_DEBUG", False))
 
 ALLOWED_HOSTS: List[str] = ["localhost", "127.0.0.1", "::1"]
 

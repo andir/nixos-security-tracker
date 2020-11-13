@@ -7,7 +7,7 @@ from typing import BinaryIO, Dict
 import requests
 from django.core.management.base import BaseCommand
 
-from tracker.models import Issue
+from tracker.models import Issue, IssueReference
 
 
 class Command(BaseCommand):
@@ -50,29 +50,95 @@ class Command(BaseCommand):
                     if entry["lang"] == "en"
                 )
 
-                cves[identifier] = description
+                references = [
+                    data["url"] for data in cve["references"]["reference_data"]
+                ]
+
+                cves[identifier] = {
+                    "description": description,
+                    "references": sorted(references),
+                }
 
             cve_ids = set(cves.keys())
-            existing_issues = Issue.objects.filter(identifier__in=cve_ids)
+            existing_issues = list(
+                Issue.objects.prefetch_related("references").filter(
+                    identifier__in=cve_ids
+                )
+            )
             missing_issues = cve_ids ^ set(i.identifier for i in existing_issues)
 
             # insert all the missing issues
             if missing_issues:
                 Issue.objects.bulk_create(
-                    (Issue(identifier=i, description=cves[i]) for i in missing_issues)
+                    (
+                        Issue(identifier=i, description=cves[i]["description"])
+                        for i in missing_issues
+                    )
                 )
 
+                missing_issues_with_references = dict(
+                    (i, cves[i]["references"])
+                    for i in missing_issues
+                    if cves[i]["references"]
+                )
+
+                if missing_issues_with_references:
+                    objs = Issue.objects.filter(
+                        identifier__in=missing_issues_with_references.keys()
+                    )
+                    references_to_create = []
+                    for issue in objs:
+                        references = missing_issues_with_references[issue.identifier]
+
+                        references_to_create += [
+                            IssueReference(issue=issue, uri=uri) for uri in references
+                        ]
+                    IssueReference.objects.bulk_create(references_to_create)
+
             for issue in existing_issues:
-                description = cves[issue.identifier]
+                cve = cves[issue.identifier]
+                description = cve["description"]
+
                 if issue.description != description:
                     self.stdout.write(
                         self.style.NOTICE(
-                            f"Updating description of issue {issue.identifier}"
+                            f"Updating metadata of issue {issue.identifier}"
                         )
                     )
 
                     issue.description = description
                     issue.save()
+
+                references = set(cve["references"])
+
+                existing_uris = set(r.uri for r in issue.references.all())
+
+                # the difference between the two sets, this yield missing and "exceeding" items
+                diff_uris = existing_uris ^ references
+
+                # filter the diff into missing and exceeding (to be removed) items
+                missing_uris = diff_uris & references
+                to_be_removed_uris = diff_uris & existing_uris
+
+                if to_be_removed_uris:
+                    self.stdout.write(
+                        self.style.NOTICE(
+                            f"Removing {len(to_be_removed_uris)} references from issue {issue.identifier}"
+                        )
+                    )
+                    IssueReference.objects.filter(
+                        issue=issue, uri__in=to_be_removed_uris
+                    ).delete()
+
+                if missing_uris:
+                    self.stdout.write(
+                        self.style.NOTICE(
+                            f"Creating {len(references)} references from issue {issue.identifier}"
+                        )
+                    )
+                    IssueReference.objects.bulk_create(
+                        IssueReference(issue=issue, uri=uri) for uri in missing_uris
+                    )
 
 
 def gzip_decompress(input: BinaryIO) -> BinaryIO:

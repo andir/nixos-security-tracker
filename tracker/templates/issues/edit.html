@@ -5,23 +5,44 @@
 
 {% load bootstrap4 %}
 {% block "content" %}
-<h1>{{ issue.identifier }}</h1>
 
+<form action="{% url 'issue_edit' issue.identifier %}" method="post">
+{% csrf_token %}
+
+<div class="row">
+    <div class="col-sm-10">
+        <h1>{{ issue.identifier }}</h1>
+    </div>
+    <div class="col-sm-2">
+        {% buttons %}
+        <a href="{% url 'issue_detail' issue.identifier %}" class="btn btn-secondary">Back</a>
+        <button type="submit" class="btn btn-primary">Save</button>
+        {% endbuttons %}
+    </div>
+</div>
+
+<dl class="row">
+	<dt class="col-sm-3">Status</dt>
+    <dd class="col-sm-9">
+        {% bootstrap_field form.status show_label=False %}
+        {% bootstrap_field form.status_reason show_label=False %}
+    </dd>
+</dl>
 <dl class="row">
 	<dt class="col-sm-3">Description</dt>
 	<dd class="col-sm-9">{{ issue.description }}</dd>
 </dl>
 <dl class="row">
-    <dt class="col-sm-3">Note</dt>
-    <dd class="col-sm-9">
-        <form action="{% url 'issue_edit' issue.identifier %}" method="post">
-            {% csrf_token %}
-            {% bootstrap_form form %}
-            {% buttons %}
-                <a href="{% url 'issue_detail' issue.identifier %}" class="btn btn-secondary">Back</a>
-                <button type="submit" class="btn btn-primary">Save</button>
-            {% endbuttons %}
-        </form>
+	<dt class="col-sm-3">References</dt>
+	<dd class="col-sm-9">
+        {% for reference in references %}
+        {{ reference.uri | urlize }}<br />
+        {% endfor %}
     </dd>
 </dl>
+<dl class="row">
+    <dt class="col-sm-3">Note</dt>
+    <dd class="col-sm-9">{% bootstrap_field form.note show_label=False %}</dd>
+</dl>
+</form>
 {% endblock %}

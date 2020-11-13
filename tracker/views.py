@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.views.generic import DetailView, UpdateView
 from django_tables2 import SingleTableView
 
-from .models import Advisory, Issue
+from .models import Advisory, Issue, IssueReference
 from .tables import IssueTable
 
 
@@ -40,6 +40,11 @@ class IssueDetail(DetailView):
     slug_url_kwarg = "identifier"
     template_name = "issues/detail.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["references"] = IssueReference.objects.filter(issue=self.object)
+        return context
+
 
 class IssueEdit(LoginRequiredMixin, UpdateView):
     model = Issue
@@ -47,4 +52,9 @@ class IssueEdit(LoginRequiredMixin, UpdateView):
     slug_url_kwarg = "identifier"
     template_name = "issues/edit.html"
 
-    fields = ["note"]
+    fields = ["status", "status_reason", "note"]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["references"] = IssueReference.objects.filter(issue=self.object)
+        return context

@@ -4,7 +4,7 @@ from django.db.utils import IntegrityError
 from django.urls import reverse
 
 from ..models import Advisory, AdvisorySeverity, AdvisoryStatus, Issue
-from .factories import AdvisoryFactory, IssueFactory, PackageFactory
+from .factories import AdvisoryFactory, IssueFactory, IssueReferenceFactory
 
 
 @pytest.mark.django_db
@@ -33,9 +33,7 @@ def test_advisories_require_unique_nsa_id():
 
 @pytest.mark.django_db
 def test_advisory_make_text():
-    package = PackageFactory()
     issue = IssueFactory()
-    issue.packages.add(package)
 
     advisory = Advisory.objects.create(
         nsa_id="123", severity=AdvisorySeverity.MEDIUM, title="title"
@@ -98,3 +96,10 @@ def test_issue_get_absolute_url():
     assert issue.get_absolute_url() == reverse(
         "issue_detail", kwargs={"identifier": issue.identifier}
     )
+
+
+@pytest.mark.django_db
+def test_issue_reference():
+    reference = IssueReferenceFactory()
+    assert reference.issue and isinstance(reference.issue, Issue)
+    assert reference.uri and reference.uri != ""

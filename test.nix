@@ -12,7 +12,7 @@ pkgs.nixosTest {
       services.nginx = {
         enable = true;
         virtualHosts.localhost.locations."=/nvd-data.json.gz" = {
-          alias = "${./tracker/tests/fixtures/nvdcve-1.1-2002.json.gz}";
+          alias = "${./tracker/tests/fixtures/nvdcve-1.1-2002-stripped.json.gz}";
         };
       };
     };

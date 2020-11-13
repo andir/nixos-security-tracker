@@ -1,5 +1,6 @@
 from factory import Sequence, SubFactory
 from factory.django import DjangoModelFactory
+
 from tracker import models
 
 
@@ -11,23 +12,12 @@ class IssueFactory(DjangoModelFactory):
     description = Sequence(lambda n: f"description {n}")
 
 
-class ReleaseFactory(DjangoModelFactory):
+class IssueReferenceFactory(DjangoModelFactory):
     class Meta:
-        model = models.Release
+        model = models.IssueReference
 
-
-class SCMRevisionFactory(DjangoModelFactory):
-    class Meta:
-        model = models.SCMRevision
-
-    release = SubFactory(ReleaseFactory)
-
-
-class PackageFactory(DjangoModelFactory):
-    class Meta:
-        model = models.Package
-
-    revision = SubFactory(SCMRevisionFactory)
+    issue = SubFactory(IssueFactory)
+    uri = Sequence(lambda n: f"http://example.com/?reference={n}")
 
 
 class AdvisoryFactory(DjangoModelFactory):
