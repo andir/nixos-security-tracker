@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from pytest_django.asserts import assertRedirects, assertTemplateUsed
 
-from ..models import Advisory, Issue
+from ..models import Advisory, Issue, IssueStatus
 from ..views import list_advisories
 from .factories import AdvisoryFactory, IssueFactory, IssueReferenceFactory
 
@@ -141,6 +141,7 @@ def test_edit_issue_requires_login(client):
 @pytest.mark.django_db
 def test_edit_issue(authenticated_client):
     issue = IssueFactory(note="this is a note")
+    assert issue.status != IssueStatus.NOTFORUS
     response = authenticated_client.get(
         reverse("issue_edit", kwargs={"identifier": issue.identifier})
     )
@@ -151,6 +152,8 @@ def test_edit_issue(authenticated_client):
     assert "form" in response.context
     form = response.context["form"].initial.copy()
     form["note"] = "another note"
+    form["status"] = IssueStatus.NOTFORUS
+    form["status_reason"] = "just testing"
 
     response = authenticated_client.post(
         reverse("issue_edit", kwargs={"identifier": issue.identifier}),
@@ -163,3 +166,5 @@ def test_edit_issue(authenticated_client):
     assert "another note" in response.content.decode("utf-8")
     issue.refresh_from_db()
     assert issue.note == "another note"
+    assert issue.status == IssueStatus.NOTFORUS
+    assert issue.status_reason == "just testing"
