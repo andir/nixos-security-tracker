@@ -46,6 +46,7 @@ pkgs.mkShell {
     pkgs.python3Packages.flake8
     pkgs.geckodriver
     pkgs.firefox
+    pkgs.netlify-cli
     test-runner
   ];
 
