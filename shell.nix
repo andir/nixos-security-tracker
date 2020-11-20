@@ -21,6 +21,11 @@ let
         entry = "${pkgs.editorconfig-checker}/bin/editorconfig-checker '\\.git'";
         pass_filenames = false;
       };
+      bandit = {
+        enable = true;
+        entry = "${env}/bin/bandit -r ";
+        pass_filenames = true;
+      };
     };
   };
   env = pkgs.poetry2nix.mkPoetryEnv {

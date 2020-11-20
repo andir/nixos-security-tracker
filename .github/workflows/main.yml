@@ -4,6 +4,18 @@ on:
   pull_request:
     branches: [ master ]
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: nixbuild/nix-quick-install-action@v4
+      - uses: nixbuild/nixbuild-action@v1
+        with:
+          nixbuild_ssh_key: ${{ secrets.nixbuild_ssh_key }}
+      - name: black
+        run: nix-shell --pure --run "black --check ."
+      - name: bandit
+        run: nix-shell --pure --run "bandit -r ."
   tests:
     runs-on: ubuntu-latest
     steps:
