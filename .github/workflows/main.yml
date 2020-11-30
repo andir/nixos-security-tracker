@@ -43,14 +43,17 @@ jobs:
       - run: nix-build
       - run: nix-build -A staticFiles
       - run: nix-build -A manage
-  instantiate-vm-test:
+  vm-test:
     # only instantiate but do not run/build the test as there is currently no way to use
     # KVM on neither GitHub Actions nor nixbuild.net
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
       - uses: nixbuild/nix-quick-install-action@v4
+        with:
+          nix_conf: "system-features = nixos-test benchmark big-parallel kvm"
       - uses: nixbuild/nixbuild-action@v3
         with:
           nixbuild_ssh_key: ${{ secrets.nixbuild_ssh_key }}
-      - run: nix-instantiate test.nix -A driver
+      - run: nix-build test.nix -A driver
+      - run: nix-build --max-jobs 1 test.nix
