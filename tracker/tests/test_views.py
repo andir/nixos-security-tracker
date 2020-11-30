@@ -9,6 +9,7 @@ from django.urls import reverse
 from pytest_django.asserts import assertRedirects, assertTemplateUsed
 
 from ..models import Advisory, GitHubEvent, Issue, IssueStatus
+from ..utils import compute_github_hmac
 from ..views import list_advisories
 from .factories import AdvisoryFactory, IssueFactory, IssueReferenceFactory
 
@@ -220,4 +221,47 @@ def test_github_event_empty_event_type(client):
     assert response.status_code == 400
     assert response.content.decode("utf-8") == "Go away."
     q = GitHubEvent.objects.filter(data__empty="event_kind")
+    assert q.count() == 0
+
+
+@pytest.mark.django_db
+def test_github_event_verifies_signature(client, settings):
+    shared_key = b"00000000000"
+    settings.GITHUB_EVENTS_SECRET = shared_key
+    content = '{"verified": "signature"}'
+    response = client.post(
+        reverse("github_event"),
+        content,
+        content_type="application/json",
+        HTTP_X_Github_Event="test_github_event_verifies_signature",
+        HTTP_X_Hub_Signature=compute_github_hmac(shared_key, content.encode()),
+    )
+
+    assert response.status_code == 200
+    q = GitHubEvent.objects.filter(
+        data__verified="signature", kind="test_github_event_verifies_signature"
+    )
+    assert q.count() == 1
+
+
+@pytest.mark.django_db
+def test_github_event_verifies_signature_ignores_invalid(client, settings):
+    shared_key = b"00000000000"
+    settings.GITHUB_EVENTS_SECRET = shared_key
+    content = '{"verified": "signature"}'
+    response = client.post(
+        reverse("github_event"),
+        content,
+        content_type="application/json",
+        HTTP_X_Github_Event="test_github_event_verifies_signature_ignores_invalid",
+        HTTP_X_Hub_Signature="trash-"
+        + compute_github_hmac(shared_key, content.encode()),
+    )
+
+    assert response.status_code == 400
+    assert response.content.decode() == "No thanks."
+    q = GitHubEvent.objects.filter(
+        data__verified="signature",
+        kind="test_github_event_verifies_signature_ignores_invalid",
+    )
     assert q.count() == 0

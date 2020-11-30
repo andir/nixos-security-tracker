@@ -160,3 +160,6 @@ BOOTSTRAP4 = {}
 
 # Number of items per page in list and table views
 PAGINATE_BY = 15
+
+# GitHub Event shared key
+GITHUB_EVENTS_SECRET = False

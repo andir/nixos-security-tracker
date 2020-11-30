@@ -7,13 +7,14 @@ from django.contrib.auth.views import LoginView as AuthLoginView
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, UpdateView
 from django_tables2 import SingleTableView
 
 from .models import Advisory, GitHubEvent, Issue, IssueReference
 from .tables import IssueTable
+from .utils import verify_github_signature
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +80,15 @@ def github_event(request):
     if not kind:
         logger.error("Invalid event type received: %s", kind)
         return HttpResponseBadRequest("Go away.")
+
+    if settings.GITHUB_EVENTS_SECRET:
+        if "X-Hub-Signature" not in request.headers:
+            return HttpResponseBadRequest("Not even signed…")
+        signature = request.headers["X-Hub-Signature"]
+        if not verify_github_signature(
+            settings.GITHUB_EVENTS_SECRET, signature, request.body
+        ):
+            return HttpResponseBadRequest("No thanks.")
 
     try:
         data = json.loads(request.body)
