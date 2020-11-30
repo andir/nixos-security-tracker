@@ -4,6 +4,21 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
+class GitHubEvent(models.Model):
+    received_at = models.DateTimeField(
+        auto_now_add=True, help_text="Datetime when this entry was made"
+    )
+    kind = models.CharField(
+        max_length=32,
+        blank=False,
+        null=False,
+        help_text="Content of the X-GitHub-Event HTTP header",
+    )
+    data = models.JSONField(
+        blank=False, null=False, help_text="The RAW event data as received from GitHub"
+    )
+
+
 class IssueReference(models.Model):
     """
     Additional references for issues
