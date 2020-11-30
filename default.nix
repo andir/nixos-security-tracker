@@ -5,6 +5,7 @@ let
     inherit src;
     projectDir = ./.;
     python = pkgs.python3;
+    overrides = pkgs.callPackage ./nix/python-overrides.nix { };
     checkPhase = ''
       SKIP_E2E_TESTS=1 pytest .
 

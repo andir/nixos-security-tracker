@@ -11,6 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterModelOptions(
-            name="issue", options={"ordering": ("identifier",)},
+            name="issue",
+            options={"ordering": ("identifier",)},
         ),
     ]

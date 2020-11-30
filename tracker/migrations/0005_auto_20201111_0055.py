@@ -10,13 +10,35 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="packageadvisorystatus", name="issue",),
-        migrations.RemoveField(model_name="packageadvisorystatus", name="package",),
-        migrations.RemoveField(model_name="scmrevision", name="release",),
-        migrations.RemoveField(model_name="issue", name="packages",),
-        migrations.DeleteModel(name="Package",),
-        migrations.DeleteModel(name="PackageAdvisoryStatus",),
-        migrations.DeleteModel(name="Patch",),
-        migrations.DeleteModel(name="Release",),
-        migrations.DeleteModel(name="SCMRevision",),
+        migrations.RemoveField(
+            model_name="packageadvisorystatus",
+            name="issue",
+        ),
+        migrations.RemoveField(
+            model_name="packageadvisorystatus",
+            name="package",
+        ),
+        migrations.RemoveField(
+            model_name="scmrevision",
+            name="release",
+        ),
+        migrations.RemoveField(
+            model_name="issue",
+            name="packages",
+        ),
+        migrations.DeleteModel(
+            name="Package",
+        ),
+        migrations.DeleteModel(
+            name="PackageAdvisoryStatus",
+        ),
+        migrations.DeleteModel(
+            name="Patch",
+        ),
+        migrations.DeleteModel(
+            name="Release",
+        ),
+        migrations.DeleteModel(
+            name="SCMRevision",
+        ),
     ]
