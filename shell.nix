@@ -32,6 +32,7 @@ let
     python = pkgs.python3;
     pyproject = ./pyproject.toml;
     poetrylock = ./poetry.lock;
+    overrides = pkgs.callPackage ./nix/python-overrides.nix { };
   };
 
   test-runner = pkgs.writeShellScriptBin "test-runner" ''
