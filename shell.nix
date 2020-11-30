@@ -23,7 +23,7 @@ let
       };
       bandit = {
         enable = true;
-        entry = "${env}/bin/bandit -r ";
+        entry = "${env}/bin/bandit --ini .bandit -r ";
         pass_filenames = true;
       };
     };
