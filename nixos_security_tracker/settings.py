@@ -143,9 +143,13 @@ TIME_ZONE = "UTC"
 
 USE_I18N = True
 
-USE_L10N = True
+# Disabled so we can setup sane formats that make sense for an international audience
+USE_L10N = False
 
 USE_TZ = True
+
+DATE_FORMAT = "Y-m-d"
+DATETIME_FORMAT = "Y-m-d H:i"
 
 
 # Static files (CSS, JavaScript, Images)
