@@ -3,7 +3,7 @@ from django.db import transaction
 from django.db.utils import IntegrityError
 from django.urls import reverse
 
-from ..models import Advisory, AdvisorySeverity, AdvisoryStatus, Issue
+from ..models import Advisory, AdvisorySeverity, AdvisoryStatus, GitHubEvent, Issue
 from .factories import AdvisoryFactory, IssueFactory, IssueReferenceFactory
 
 
@@ -103,3 +103,23 @@ def test_issue_reference():
     reference = IssueReferenceFactory()
     assert reference.issue and isinstance(reference.issue, Issue)
     assert reference.uri and reference.uri != ""
+
+
+@pytest.mark.django_db
+def test_create_github_event():
+    event = GitHubEvent(kind="some_event", data={"key": "value"})
+    event.save()
+
+
+@pytest.mark.django_db
+def test_create_github_event_requires_data():
+    event = GitHubEvent(kind="some_event", data=None)
+    with pytest.raises(IntegrityError):
+        event.save()
+
+
+@pytest.mark.django_db
+def test_create_github_event_requires_event_kind():
+    event = GitHubEvent(kind=None, data={})
+    with pytest.raises(IntegrityError):
+        event.save()

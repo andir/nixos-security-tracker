@@ -160,3 +160,10 @@ BOOTSTRAP4 = {}
 
 # Number of items per page in list and table views
 PAGINATE_BY = 15
+
+# GitHub Event shared key
+_github_events_secret = os.getenv("NIXOS_SECURITY_TRACKER_GITHUB_EVENTS_SECRET", False)
+if _github_events_secret:
+    GITHUB_EVENTS_SECRET = _github_events_secret.encode()
+else:
+    GITHUB_EVENTS_SECRET = False

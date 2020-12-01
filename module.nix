@@ -15,6 +15,10 @@ in
           Whether migrations should be run on startup.
         '';
       };
+      githubEventsSharedSecretFile = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+      };
       database = lib.mkOption {
         type = lib.types.enum [ "sqlite" "postgresql" ];
         default = "sqlite";
@@ -105,7 +109,9 @@ in
 
     systemd.services =
       let
-        envFile = pkgs.writeText "env" (if cfg.database == "sqlite" then ''
+        envFile = pkgs.writeText "env" ((lib.optionalString (cfg.githubEventsSharedSecretFile != null) ''
+          export NIXOS_SECURITY_TRACKER_GITHUB_EVENTS_SECRET="$(<${cfg.githubEventsSharedSecretFile})"
+        '') + (if cfg.database == "sqlite" then ''
           export NIXOS_SECURITY_TRACKER_DATABASE_TYPE="sqlite"
           export NIXOS_SECURITY_TRACKER_DATABASE_NAME="$STATE_DIRECTORY/database.sqlite"
         '' else if cfg.database == "postgresql" then ''
@@ -117,7 +123,7 @@ in
           ${lib.optionalString (cfg.postgresqlPasswordFile != null) ''
             export NIXOS_SECURITY_TRACKER_DATABASE_PASSWORD="$(<${cfg.postgresqlPasswordFile})"
           ''}
-        '' else throw "unexpected database type ${cfg.database}");
+        '' else throw "unexpected database type ${cfg.database}"));
       in
       {
 
