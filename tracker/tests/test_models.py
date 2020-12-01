@@ -1,7 +1,11 @@
+import datetime
+
 import pytest
+import pytz
 from django.db import transaction
 from django.db.utils import IntegrityError
 from django.urls import reverse
+from freezegun import freeze_time
 
 from ..models import Advisory, AdvisorySeverity, AdvisoryStatus, GitHubEvent, Issue
 from .factories import AdvisoryFactory, IssueFactory, IssueReferenceFactory
@@ -54,32 +58,38 @@ def test_issue_requires_identifier():
 
 
 @pytest.mark.django_db
+@freeze_time("2015-01-01 00:30:00")
 def test_issue_sort_order():
     """
-    Issues should by default be sorted by the identifier.
+    Issues should by default be sorted by the date they were published.
     """
 
+    now = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
     issues = [
-        IssueFactory(identifier="ZZZZZ"),
-        IssueFactory(identifier="AAAAA"),
-        IssueFactory(identifier="DDDDD"),
+        IssueFactory(
+            identifier="AAAAA", published_date=now - datetime.timedelta(hours=1)
+        ),
+        IssueFactory(
+            identifier="BBBBB", published_date=now + datetime.timedelta(days=1)
+        ),
+        IssueFactory(identifier="CCCCC", published_date=now),
     ]
 
-    print(issues)
     q = Issue.objects.filter(pk__in=[i.pk for i in issues])
-    assert q.first().identifier == "AAAAA"
-    assert q[1].identifier == "DDDDD"
-    assert q.last().identifier == "ZZZZZ"
+    assert q.first().identifier == "BBBBB"
+    assert q[1].identifier == "CCCCC"
+    assert q.last().identifier == "AAAAA"
 
 
 @pytest.mark.django_db
 def test_issue_identifier_must_be_unique():
     identifier = "unique-issue-identifier"
-    i1 = Issue(identifier=identifier)
+    now = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
+    i1 = Issue(identifier=identifier, published_date=now)
     i1.save()
 
     with pytest.raises(IntegrityError):
-        i2 = Issue(identifier=identifier)
+        i2 = Issue(identifier=identifier, published_date=now)
         i2.save()
 
 

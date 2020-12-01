@@ -66,12 +66,17 @@ class Issue(models.Model):
     )
     description = models.TextField(blank=True, help_text="A description for this issue")
     note = models.TextField(blank=True, help_text="A note regarding this issue")
+    published_date = models.DateTimeField(
+        blank=False,
+        null=False,
+        help_text="The date and time when the issue was first published",
+    )
 
     def get_absolute_url(self):
         return reverse("issue_detail", kwargs={"identifier": self.identifier})
 
     class Meta:
-        ordering = ("identifier",)
+        ordering = ("-published_date",)
 
 
 #########################################################

@@ -102,7 +102,7 @@ def test_list_issues(client):
     issues = IssueFactory.create_batch(settings.PAGINATE_BY * num_pages)
     issues.sort(key=lambda issue: issue.identifier)
 
-    i = iter(issues)
+    i = iter(sorted(issues, key=lambda i: i.published_date, reverse=True))
     slices = [itertools.islice(iter(i), settings.PAGINATE_BY) for _ in range(num_pages)]
 
     for page, issue_chunk in enumerate(slices, start=1):
