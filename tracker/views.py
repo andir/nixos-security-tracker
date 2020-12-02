@@ -12,9 +12,9 @@ from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, UpdateView
 from django_tables2 import SingleTableView
 
+from .github_events.signature import verify_github_signature
 from .models import Advisory, GitHubEvent, Issue, IssueReference
 from .tables import IssueTable
-from .utils import verify_github_signature
 
 logger = logging.getLogger(__name__)
 

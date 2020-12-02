@@ -52,7 +52,7 @@ pkgs.nixosTest {
             pkgs.python3
           ];
         } ''
-        cat ${./tracker/utils.py} > script.py
+        cat ${./tracker/github_events/signature.py} > script.py
         cat - <<EOF >> script.py
         print(compute_github_hmac("${sharedSecret}".encode(), open("$githubEventPath", "rb").read()))
         EOF

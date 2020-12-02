@@ -8,8 +8,8 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from pytest_django.asserts import assertRedirects, assertTemplateUsed
 
+from ..github_events.signature import compute_github_hmac
 from ..models import Advisory, GitHubEvent, Issue, IssueStatus
-from ..utils import compute_github_hmac
 from ..views import list_advisories
 from .factories import AdvisoryFactory, IssueFactory, IssueReferenceFactory
 
