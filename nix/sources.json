@@ -5,10 +5,10 @@
         "homepage": "",
         "owner": "cachix",
         "repo": "pre-commit-hooks.nix",
-        "rev": "431227b41d0aaa83fabdee6611e145b7d9bd150b",
-        "sha256": "0ff24n8i3mfw0jw5r5lsgvbahmh88zhi3qsk9yxrb8x82jprgzsy",
+        "rev": "1b11ce0f8c65dd3d8e9520e23c100b76d09a858b",
+        "sha256": "0l2v8hsxrvj8w335xxxln49rpd9z5ncv6bl2wnk65zzzd4wa5rkm",
         "type": "tarball",
-        "url": "https://github.com/cachix/pre-commit-hooks.nix/archive/431227b41d0aaa83fabdee6611e145b7d9bd150b.tar.gz",
+        "url": "https://github.com/cachix/pre-commit-hooks.nix/archive/1b11ce0f8c65dd3d8e9520e23c100b76d09a858b.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "nixpkgs": {
@@ -17,10 +17,10 @@
         "homepage": "",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "8ee7c2505f9e7019aa69c8a6313e5f2d32a69f27",
-        "sha256": "048b00wz86pxifzm708nwl0g3nchb1yi6lwlsw4yg8jnlrqv48xh",
+        "rev": "296793637b22bdb4d23b479879eba0a71c132a66",
+        "sha256": "0j09yih9693w5vjx64ikfxyja1ha7pisygrwrpg3wfz3sssglg69",
         "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs/archive/8ee7c2505f9e7019aa69c8a6313e5f2d32a69f27.tar.gz",
+        "url": "https://github.com/NixOS/nixpkgs/archive/296793637b22bdb4d23b479879eba0a71c132a66.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "poetry2nix": {
@@ -29,10 +29,10 @@
         "homepage": "",
         "owner": "nix-community",
         "repo": "poetry2nix",
-        "rev": "d460ed2be1d74fb0b267e881ff4c317d74479845",
-        "sha256": "0xb39nfbsw0z3h59q1z8i2v2n57mdrvml07ww7ral8jm8ac7vp72",
+        "rev": "fd0e5772e6e48727904913db8f6df0511086f8ac",
+        "sha256": "1b4y4h860fm78sh9h1v0vwgmrlvr7fl0k4bhcrg2r46ls7vz1mx5",
         "type": "tarball",
-        "url": "https://github.com/nix-community/poetry2nix/archive/d460ed2be1d74fb0b267e881ff4c317d74479845.tar.gz",
+        "url": "https://github.com/nix-community/poetry2nix/archive/fd0e5772e6e48727904913db8f6df0511086f8ac.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     }
 }
