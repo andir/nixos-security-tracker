@@ -32,8 +32,7 @@ def test_advisories_require_unique_nsa_id():
     adv.save()
 
     with pytest.raises(IntegrityError):
-        adv = AdvisoryFactory(nsa_id=nsa_id)
-        adv.save()
+        AdvisoryFactory(nsa_id=nsa_id)
 
 
 @pytest.mark.django_db
