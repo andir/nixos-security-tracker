@@ -39,6 +39,9 @@ class GitHubEvent(models.Model):
             f"`body` attribute not supported for event kind {self.kind}"
         )
 
+    def __str__(self):
+        return f"<GitHubEvent(kind={self.kind}, received_at={self.received_at})>"
+
 
 class IssueReference(models.Model):
     """

@@ -140,3 +140,10 @@ def test_github_event_data_missing():
     event = GitHubEvent(kind="unsupported type", data={})
     with pytest.raises(GitHubEventBodyNotSupported):
         event.body
+
+
+@pytest.mark.parametrize("klass, kwargs", [(GitHubEvent, {"kind": "test"})])
+def test_model_str(klass, kwargs):
+    obj = klass(**kwargs)
+    s = str(obj)
+    assert isinstance(s, str)
