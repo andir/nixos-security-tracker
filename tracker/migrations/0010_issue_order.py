@@ -20,6 +20,7 @@ class Migration(migrations.Migration):
             field=models.DateTimeField(
                 default=None,
                 help_text="The date and time when the issue was first published",
+                null=True,
             ),
             preserve_default=False,
         ),

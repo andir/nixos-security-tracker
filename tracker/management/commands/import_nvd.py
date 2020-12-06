@@ -107,6 +107,16 @@ class Command(BaseCommand):
                 cve = cves[issue.identifier]
                 description = cve["description"]
 
+                # handle initial database migration that introduced
+                # published_date
+                if issue.published_date is None:
+                    self.style.NOTICE(
+                        f"Adding published_date to issue {issue.identifier}"
+                    )
+
+                    issue.published_date = cve["published_date"]
+                    issue.save()
+
                 if issue.description != description:
                     self.stdout.write(
                         self.style.NOTICE(

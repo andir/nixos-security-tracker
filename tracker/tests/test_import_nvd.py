@@ -206,3 +206,30 @@ def test_import_nvd_falls_back_to_timerange(request_get):
             ),
         ]
     )
+
+
+@patch("requests.get")
+@pytest.mark.django_db
+def test_import_nvd_updates_missing_published_date(request_get):
+    """
+    Assert that the import_nvd script also sets the published_date when it is
+    missing in the import but doesn't update it.
+    """
+
+    url = "https://test-dat"
+    identifier = "CVE-1999-0001"
+    expected_description = "ip_input.c in BSD-derived TCP/IP implementations allows remote attackers to cause a denial of service (crash or hang) via crafted packets."
+
+    IssueFactory(
+        identifier=identifier,
+        description="This is an outdated description",
+        published_date=None,
+    )
+
+    request_get.return_value = mocked_nvd_response()
+    call_command("import_nvd", url)
+    request_get.assert_called_once_with(url, stream=True)
+
+    issue = Issue.objects.get(identifier=identifier)
+    assert issue.description == expected_description
+    assert issue.published_date is not None

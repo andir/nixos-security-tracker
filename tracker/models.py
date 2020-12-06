@@ -68,7 +68,7 @@ class Issue(models.Model):
     note = models.TextField(blank=True, help_text="A note regarding this issue")
     published_date = models.DateTimeField(
         blank=False,
-        null=False,
+        null=True,  # allow this to be Null while we migrate the database
         help_text="The date and time when the issue was first published",
     )
 
