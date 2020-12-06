@@ -3,6 +3,7 @@ name = "nixos_security_tracker"
 version = "0.1.0"
 description = ""
 authors = ["Andreas Rammhold <andreas@rammhold.de>"]
+license = "AGPL-3.0-or-later"
 packages = [
 	{ include = "nixos_security_tracker" },
 	{ include = "tracker" },
