@@ -3,6 +3,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from .exceptions import GitHubEventBodyNotSupported
+
 
 class GitHubEvent(models.Model):
     received_at = models.DateTimeField(
@@ -17,6 +19,21 @@ class GitHubEvent(models.Model):
     data = models.JSONField(
         blank=False, null=False, help_text="The RAW event data as received from GitHub"
     )
+
+    @property
+    def body(self):
+        """
+        Get the body (aka the message) of this event.
+        Raises GitHubEventBodyNotSupported exception in case we do not yet know how
+        to deal with this kind.
+        """
+
+        if self.kind == "issue_comment":
+            return self.data["comment"]["body"]
+
+        raise GitHubEventBodyNotSupported(
+            f"`body` attribute not supported for event kind {self.kind}"
+        )
 
 
 class IssueReference(models.Model):

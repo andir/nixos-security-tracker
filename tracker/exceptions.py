@@ -1,0 +1,2 @@
+class GitHubEventBodyNotSupported(AttributeError):
+    pass
