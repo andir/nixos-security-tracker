@@ -95,6 +95,15 @@ def test_search_cve_references(issue_comment_json):
 
 
 @pytest.mark.django_db
+def test_search_cve_references_no_identifiers(issue_comment_json):
+    issue_comment_json["comment"]["body"] = "something else"
+    event = GitHubEvent.objects.create(kind="issue_comment", data=issue_comment_json)
+    assert event.body == "something else"
+    references = list(search_for_cve_references())
+    assert len(references) == 0
+
+
+@pytest.mark.django_db
 def test_search_cve_references_command(issue_comment_json, pull_request_json):
     out = StringIO()
     GitHubEvent.objects.create(kind="issue_comment", data=issue_comment_json)
