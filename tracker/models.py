@@ -34,6 +34,8 @@ class GitHubEvent(models.Model):
 
         if self.kind == "issue_comment":
             return self.data["comment"]["body"]
+        elif self.kind == "pull_request":
+            return self.data["pull_request"]["body"]
 
         raise GitHubEventBodyNotSupported(
             f"`body` attribute not supported for event kind {self.kind}"

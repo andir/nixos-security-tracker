@@ -58,6 +58,34 @@ def issue_comment_json():
         yield json.load(fh)
 
 
+def test_github_issue_comment_body(issue_comment_json):
+    event = GitHubEvent(kind="issue_comment", data=issue_comment_json)
+    assert (
+        event.body
+        == "You are totally right! CVE-1988-1234! I'll get this fixed right away."
+    )
+
+
+@pytest.fixture
+def pull_request_json():
+    """Returns the parsed result of the pull_request JSON example as
+    given in the GitHub Webhook documentation. The difference here is
+    that we added CVE identifier into the file so our tests can match
+    against that. The CVE identifier in the comment is CVE-1999-1234.
+    """
+    dir = Path(os.path.join(os.path.dirname(os.path.realpath(__file__)), "fixtures"))
+    with open(dir / "pull_request.json") as fh:
+        yield json.load(fh)
+
+
+def test_github_pull_request_body(pull_request_json):
+    event = GitHubEvent(kind="pull_request", data=pull_request_json)
+    assert (
+        event.body
+        == "This is a pretty simple change that we need to pull into master CVE-1999-1234."
+    )
+
+
 @pytest.mark.django_db
 def test_search_cve_references(issue_comment_json):
     event = GitHubEvent.objects.create(kind="issue_comment", data=issue_comment_json)
@@ -67,11 +95,15 @@ def test_search_cve_references(issue_comment_json):
 
 
 @pytest.mark.django_db
-def test_search_cve_references_command(issue_comment_json):
+def test_search_cve_references_command(issue_comment_json, pull_request_json):
     out = StringIO()
     GitHubEvent.objects.create(kind="issue_comment", data=issue_comment_json)
+    GitHubEvent.objects.create(kind="pull_request", data=pull_request_json)
 
     call_command("search_cve_references", stdout=out)
 
     assert "CVE-1988-1234" in out.getvalue()
     assert "issue_comment" in out.getvalue()
+
+    assert "CVE-1999-1234" in out.getvalue()
+    assert "pull_request" in out.getvalue()

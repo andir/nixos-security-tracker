@@ -23,7 +23,7 @@ def search_for_cve_references() -> Iterator[Tuple[GitHubEvent, List[str]]]:
     yield tuples of (event, identifiers) where event is the GitHubEvent and
     identifiers is a list of CVE identifiers as strings.
     """
-    events = GitHubEvent.objects.filter(kind__in=["issue_comment"])
+    events = GitHubEvent.objects.filter(kind__in=["issue_comment", "pull_request"])
 
     for event in events:
         try:
