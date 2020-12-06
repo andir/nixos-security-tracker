@@ -5,6 +5,8 @@ let
       nix-pre-commit-hooks = import (sources.nix-pre-commit-hooks);
 
       poetry2nix = self.callPackage (sources.poetry2nix) { };
+
+      gitignore-nix = self.callPackage (sources."gitignore.nix") { };
     })
   ];
 in

@@ -1,6 +1,12 @@
 { pkgs ? import ./nix }:
 let
-  src = pkgs.nix-gitignore.gitignoreSource [ "*.nix" ".github" ] ./.;
+  src = pkgs.lib.cleanSourceWith {
+    filter = (name: type:
+      ! (type == "file" && pkgs.lib.hasSuffix ".nix" name)
+      && !(type == "directory" && name == ".github")
+    );
+    src = pkgs.gitignore-nix.gitignoreSource ./.;
+  };
   pkg = pkgs.poetry2nix.mkPoetryApplication {
     inherit src;
     projectDir = ./.;
