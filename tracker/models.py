@@ -7,6 +7,10 @@ from .exceptions import GitHubEventBodyNotSupported
 
 
 class GitHubEvent(models.Model):
+    """
+    GitHub events as they happen within Nixpkgs
+    """
+
     received_at = models.DateTimeField(
         auto_now_add=True, help_text="Datetime when this entry was made"
     )
