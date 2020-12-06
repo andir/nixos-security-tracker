@@ -8,4 +8,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for (event, cves) in search_for_cve_references():
-            self.stdout.write(f"{event.kind} - {cves}")
+            self.stdout.write(f"{event} - {cves}")
