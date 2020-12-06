@@ -1,14 +1,17 @@
+import datetime
 import os
 from io import StringIO
 from pathlib import Path
 from unittest.mock import MagicMock, call, patch
 
 import pytest
+import pytz
 import requests
 from django.core.management import call_command
 from freezegun import freeze_time
 
 from tracker.models import Issue, IssueReference
+from tracker.tests.factories import IssueFactory
 
 FIXTURE_DIR = Path(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), "fixtures")
@@ -119,13 +122,17 @@ def test_import_nvd_accepts_multiple_env_vars(request_get):
 
 @patch("requests.get")
 @pytest.mark.django_db
-def test_import_nvd_updates_description(request_get, mocked_nvd_response):
+@freeze_time("2005-04-20 02:38:12.270800 UTC")
+def test_import_nvd_updates_fields(request_get, mocked_nvd_response):
     url = "https://test-dat"
     identifier = "CVE-1999-0001"
+    now = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
     expected_description = "ip_input.c in BSD-derived TCP/IP implementations allows remote attackers to cause a denial of service (crash or hang) via crafted packets."
 
-    Issue.objects.create(
-        identifier=identifier, description="This is an outdated description"
+    IssueFactory(
+        identifier=identifier,
+        description="This is an outdated description",
+        published_date=now,
     )
 
     request_get.return_value = mocked_nvd_response
@@ -135,12 +142,14 @@ def test_import_nvd_updates_description(request_get, mocked_nvd_response):
     issue = Issue.objects.get(identifier=identifier)
     assert issue.description == expected_description
 
+    # the publishe date is not updated in import_nvd and should stay as is
+    assert issue.published_date == now
+
 
 @patch("requests.get")
 @pytest.mark.django_db
 def test_import_nvd_removes_references(request_get, mocked_nvd_response):
-    identifier = "CVE-1999-0001"
-    issue = Issue.objects.create(identifier=identifier)
+    issue = IssueFactory(identifier="CVE-1999-0001")
     IssueReference.objects.create(issue=issue, uri="please remove me")
 
     references = (
@@ -160,8 +169,7 @@ def test_import_nvd_removes_references(request_get, mocked_nvd_response):
 @patch("requests.get")
 @pytest.mark.django_db
 def test_import_nvd_adds_missing_references(request_get, mocked_nvd_response):
-    identifier = "CVE-1999-0001"
-    issue = Issue.objects.create(identifier=identifier)
+    issue = IssueFactory(identifier="CVE-1999-0001")
 
     assert IssueReference.objects.filter(issue=issue).count() == 0
 

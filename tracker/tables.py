@@ -11,6 +11,7 @@ class IssueTable(tables.Table):
         fields = (
             "identifier",
             "description",
+            "published_date",
         )
         template_name = "django_tables2/bootstrap4.html"
 
@@ -20,3 +21,7 @@ class IssueTable(tables.Table):
             url=reverse("issue_detail", kwargs={"identifier": value}),
             identifier=value,
         )
+
+    def render_published_date(self, value) -> str:
+        # pass through render method so the datetime format gets picked up
+        return value

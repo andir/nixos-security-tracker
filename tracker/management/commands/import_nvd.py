@@ -6,6 +6,7 @@ from typing import BinaryIO, Dict
 
 import requests
 from django.core.management.base import BaseCommand
+from django.utils.dateparse import parse_datetime
 
 from tracker.models import Issue, IssueReference
 
@@ -50,12 +51,15 @@ class Command(BaseCommand):
                     if entry["lang"] == "en"
                 )
 
+                published_date = parse_datetime(cve_item["publishedDate"])
+
                 references = [
                     data["url"] for data in cve["references"]["reference_data"]
                 ]
 
                 cves[identifier] = {
                     "description": description,
+                    "published_date": published_date,
                     "references": sorted(references),
                 }
 
@@ -71,7 +75,11 @@ class Command(BaseCommand):
             if missing_issues:
                 Issue.objects.bulk_create(
                     (
-                        Issue(identifier=i, description=cves[i]["description"])
+                        Issue(
+                            identifier=i,
+                            description=cves[i]["description"],
+                            published_date=cves[i]["published_date"],
+                        )
                         for i in missing_issues
                     )
                 )
