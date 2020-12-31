@@ -2,6 +2,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import include, path
 
 from .views import (
+    GitHubEventDetail,
     IssueDetail,
     IssueEdit,
     IssueList,
@@ -22,6 +23,9 @@ urlpatterns = [
     path("issues/", IssueList.as_view(), name="issues"),
     path("issues/<str:identifier>", IssueDetail.as_view(), name="issue_detail"),
     path("issues/<str:identifier>/edit", IssueEdit.as_view(), name="issue_edit"),
+    path(
+        "github-event/<str:pk>", GitHubEventDetail.as_view(), name="github_event_detail"
+    ),
     path("__github_event", github_event, name="github_event"),
     path("", view=index, name="index"),
 ]

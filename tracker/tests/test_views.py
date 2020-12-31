@@ -265,3 +265,16 @@ def test_github_event_verifies_signature_ignores_invalid(client, settings):
         kind="test_github_event_verifies_signature_ignores_invalid",
     )
     assert q.count() == 0
+
+
+@pytest.mark.django_db
+def test_github_event_detail(client):
+    event = GitHubEvent.objects.create(kind="whatever", data={"foo": "some-body-data"})
+    url = reverse("github_event_detail", kwargs={"pk": event.pk})
+    response = client.get(url)
+    assert response.status_code == 200
+    content = response.content.decode()
+
+    assert str(event.pk) in content
+    assert "whatever" in content
+    assert "some-body-data" in content

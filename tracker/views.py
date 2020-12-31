@@ -99,3 +99,15 @@ def github_event(request):
         return HttpResponseBadRequest("Not sure if you are serious.")
 
     return HttpResponse("Thanks!")
+
+
+class GitHubEventDetail(DetailView):
+    """
+    Show the details of a received GitHubEvent.
+    """
+
+    model = GitHubEvent
+    slug_field = "pk"
+    slug_url_kwarg = "pk"
+    template_name = "github-event/detail.html"
+    context_object_name = "github_event"
