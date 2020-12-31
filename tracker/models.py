@@ -47,7 +47,13 @@ class GitHubEvent(models.Model):
         )
 
     def __str__(self):
-        return f"<GitHubEvent(kind={self.kind}, received_at={self.received_at})>"
+        gh_number = "N/A"
+        if self.kind == "issue_comment":
+            gh_number = self.data["issue"]["number"]
+        elif self.kind == "pull_request":
+            gh_number = self.data["pull_request"]["number"]
+
+        return f"<GitHubEvent(id={self.pk}, gh_id={gh_number}, kind={self.kind}, received_at={self.received_at})>"
 
 
 class IssueReference(models.Model):
