@@ -26,11 +26,11 @@ def test_verify_github_signature():
 @pytest.mark.parametrize(
     "string, result",
     [
-        ("CVE-1998-123 CVE-1988-1234", ["CVE-1998-123", "CVE-1988-1234"]),
-        ("CVE-1998-123", ["CVE-1998-123"]),
-        ("CVE-1998-123!", ["CVE-1998-123"]),
-        ("CVE-2010-1234", ["CVE-2010-1234"]),
-        ("Something CVE-1998-123 else", ["CVE-1998-123"]),
+        ("CVE-1998-123 CVE-1988-1234", {"CVE-1998-123", "CVE-1988-1234"}),
+        ("CVE-1998-123", {"CVE-1998-123"}),
+        ("CVE-1998-123!", {"CVE-1998-123"}),
+        ("CVE-2010-1234", {"CVE-2010-1234"}),
+        ("Something CVE-1998-123 else", {"CVE-1998-123"}),
         ("xxxCVE-2010-1234", None),
         ("CVE-2010-1234xxx", None),
         ("trash", None),
@@ -38,7 +38,7 @@ def test_verify_github_signature():
     ],
 )
 def test_cve_regexp(string, result):
-    m = find_cve_identifiers(string)
+    m = find_cve_identifiers([string])
     if result:
         assert m, "Expected a match but got none"
         assert m == result
@@ -58,12 +58,11 @@ def issue_comment_json():
         yield json.load(fh)
 
 
-def test_github_issue_comment_body(issue_comment_json):
+def test_github_issue_comment_text(issue_comment_json):
     event = GitHubEvent(kind="issue_comment", data=issue_comment_json)
-    assert (
-        event.body
-        == "You are totally right! CVE-1988-1234! I'll get this fixed right away."
-    )
+    assert event.text == [
+        "You are totally right! CVE-1988-1234! I'll get this fixed right away."
+    ]
 
 
 @pytest.fixture
@@ -81,8 +80,8 @@ def pull_request_json():
 def test_github_pull_request_body(pull_request_json):
     event = GitHubEvent(kind="pull_request", data=pull_request_json)
     assert (
-        event.body
-        == "This is a pretty simple change that we need to pull into master CVE-1999-1234."
+        "This is a pretty simple change that we need to pull into master CVE-1999-1234."
+        in event.text
     )
 
 
@@ -98,7 +97,7 @@ def test_search_cve_references(issue_comment_json):
 def test_search_cve_references_no_identifiers(issue_comment_json):
     issue_comment_json["comment"]["body"] = "something else"
     event = GitHubEvent.objects.create(kind="issue_comment", data=issue_comment_json)
-    assert event.body == "something else"
+    assert event.text == ["something else"]
     references = list(search_for_cve_references())
     assert len(references) == 0
 

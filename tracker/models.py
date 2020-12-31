@@ -1,3 +1,5 @@
+from typing import List
+
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -25,17 +27,20 @@ class GitHubEvent(models.Model):
     )
 
     @property
-    def body(self):
+    def text(self) -> List[str]:
         """
-        Get the body (aka the message) of this event.
+        Get the text parts (i.e. the message & title) of this event.
         Raises GitHubEventBodyNotSupported exception in case we do not yet know how
         to deal with this kind.
         """
 
         if self.kind == "issue_comment":
-            return self.data["comment"]["body"]
+            return [self.data["comment"]["body"]]
         elif self.kind == "pull_request":
-            return self.data["pull_request"]["body"]
+            return [
+                self.data["pull_request"]["body"],
+                self.data["pull_request"]["title"],
+            ]
 
         raise GitHubEventBodyNotSupported(
             f"`body` attribute not supported for event kind {self.kind}"

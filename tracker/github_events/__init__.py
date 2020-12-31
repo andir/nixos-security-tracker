@@ -10,14 +10,17 @@ logger = logging.getLogger(__name__)
 CVE_REGEXP = re.compile(r"\b(?P<id>CVE-[0-9]+-[0-9]+)\b")
 
 
-def find_cve_identifiers(body: str) -> List[str]:
+def find_cve_identifiers(text: List[str]) -> Iterator[str]:
     """
     Find all the CVE identifiers in the given string.
     """
-    return CVE_REGEXP.findall(body)
+    results = []
+    for s in text:
+        results += CVE_REGEXP.findall(s)
+    return set(results)
 
 
-def search_for_cve_references() -> Iterator[Tuple[GitHubEvent, List[str]]]:
+def search_for_cve_references() -> Iterator[Tuple[GitHubEvent, Iterator[str]]]:
     """
     Search through all the recorded GitHubEvent's (of a supported kind) and
     yield tuples of (event, identifiers) where event is the GitHubEvent and
@@ -27,7 +30,7 @@ def search_for_cve_references() -> Iterator[Tuple[GitHubEvent, List[str]]]:
 
     for event in events:
         try:
-            identifiers = find_cve_identifiers(event.body)
+            identifiers = find_cve_identifiers(event.text)
             if not identifiers:
                 logger.debug("No CVE identifiers in %s, skipping it", event)
                 continue

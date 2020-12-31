@@ -138,7 +138,7 @@ def test_create_github_event_requires_event_kind():
 def test_github_event_data_missing():
     event = GitHubEvent(kind="unsupported type", data={})
     with pytest.raises(GitHubEventBodyNotSupported):
-        event.body
+        event.text
 
 
 @pytest.mark.parametrize("klass, kwargs", [(GitHubEvent, {"kind": "test"})])
