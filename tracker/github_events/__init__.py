@@ -28,7 +28,7 @@ def search_for_cve_references() -> Iterator[Tuple[GitHubEvent, Iterator[str]]]:
     """
     events = GitHubEvent.objects.filter(kind__in=["issue_comment", "pull_request"])
 
-    for event in events:
+    for event in events.iterator():
         try:
             identifiers = find_cve_identifiers(event.text)
             if not identifiers:
