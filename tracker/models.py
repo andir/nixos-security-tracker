@@ -1,10 +1,18 @@
+from typing import List
+
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from .exceptions import GitHubEventBodyNotSupported
+
 
 class GitHubEvent(models.Model):
+    """
+    GitHub events as they happen within Nixpkgs
+    """
+
     received_at = models.DateTimeField(
         auto_now_add=True, help_text="Datetime when this entry was made"
     )
@@ -17,6 +25,35 @@ class GitHubEvent(models.Model):
     data = models.JSONField(
         blank=False, null=False, help_text="The RAW event data as received from GitHub"
     )
+
+    @property
+    def text(self) -> List[str]:
+        """
+        Get the text parts (i.e. the message & title) of this event.
+        Raises GitHubEventBodyNotSupported exception in case we do not yet know how
+        to deal with this kind.
+        """
+
+        if self.kind == "issue_comment":
+            return [self.data["comment"]["body"]]
+        elif self.kind == "pull_request":
+            return [
+                self.data["pull_request"]["body"],
+                self.data["pull_request"]["title"],
+            ]
+
+        raise GitHubEventBodyNotSupported(
+            f"`body` attribute not supported for event kind {self.kind}"
+        )
+
+    def __str__(self):
+        gh_number = "N/A"
+        if self.kind == "issue_comment":
+            gh_number = self.data["issue"]["number"]
+        elif self.kind == "pull_request":
+            gh_number = self.data["pull_request"]["number"]
+
+        return f"<GitHubEvent(id={self.pk}, gh_id={gh_number}, kind={self.kind}, received_at={self.received_at})>"
 
 
 class IssueReference(models.Model):

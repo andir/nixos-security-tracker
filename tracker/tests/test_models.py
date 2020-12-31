@@ -7,6 +7,7 @@ from django.db.utils import IntegrityError
 from django.urls import reverse
 from freezegun import freeze_time
 
+from ..exceptions import GitHubEventBodyNotSupported
 from ..models import Advisory, AdvisorySeverity, AdvisoryStatus, GitHubEvent, Issue
 from .factories import AdvisoryFactory, IssueFactory, IssueReferenceFactory
 
@@ -31,8 +32,7 @@ def test_advisories_require_unique_nsa_id():
     adv.save()
 
     with pytest.raises(IntegrityError):
-        adv = AdvisoryFactory(nsa_id=nsa_id)
-        adv.save()
+        AdvisoryFactory(nsa_id=nsa_id)
 
 
 @pytest.mark.django_db
@@ -133,3 +133,16 @@ def test_create_github_event_requires_event_kind():
     event = GitHubEvent(kind=None, data={})
     with pytest.raises(IntegrityError):
         event.save()
+
+
+def test_github_event_data_missing():
+    event = GitHubEvent(kind="unsupported type", data={})
+    with pytest.raises(GitHubEventBodyNotSupported):
+        event.text
+
+
+@pytest.mark.parametrize("klass, kwargs", [(GitHubEvent, {"kind": "test"})])
+def test_model_str(klass, kwargs):
+    obj = klass(**kwargs)
+    s = str(obj)
+    assert isinstance(s, str)
