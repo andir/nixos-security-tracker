@@ -47,7 +47,7 @@ def test_login(client):
     assert "form" in response.context
 
     username = "test"
-    password = "mypassword"
+    password = "mypassword"  # nosec B105
     User.objects.create_user(username=username, password=password)
 
     form = response.context["form"].initial.copy()

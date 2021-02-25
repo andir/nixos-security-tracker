@@ -4,23 +4,18 @@ let
 
   env = pkgs.buildEnv {
     name = "publish-test-results-script";
-    paths = [ pkgs.netlify-cli pkgs.jq pkgs.coreutils pkgs.curl ];
+    paths = [ pkgs.netlify_deployer pkgs.jq pkgs.coreutils pkgs.curl pkgs.gnugrep ];
   };
 
 in
 pkgs.writeShellScript "publish-test-results" ''
     PATH=${env}/bin
     set -ex
-    args="--dir=coverage-report --json"
 
-    if [[ "''${GITHUB_REF}" == "master" ]]; then
-     args="$args --prod"
-    fi
-
-    netlify deploy $args | tee netlify.json
+    netlify-deployer ''${GITHUB_REF} ''${NETLIFY_SITE_ID} coverage-report | tee /tmp/deploy.txt
 
     if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
-      DEPLOYED_URL=$(jq -r .deploy_url netlify.json)
+      DEPLOYED_URL=$(grep 'Fully deployed at ' /tmp/deploy.txt | cut -d' ' -f4)
       PR_NUMBER=$(jq -r .number "$GITHUB_EVENT_PATH")
       cat << EOF >/tmp/body.txt
   PyTest Coverage report has been published to $DEPLOYED_URL.
