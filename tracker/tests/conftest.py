@@ -37,7 +37,7 @@ def browser_logged_in(live_server, browser, user_and_password):
 
 @pytest.fixture
 def user_and_password():
-    password = "amazing password!@312^%"
+    password = "amazing password!@312^%"  # nosec B105
     user = User.objects.create_user(username="selenium-user", password=password)
     return user.username, password
 
