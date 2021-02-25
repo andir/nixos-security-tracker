@@ -123,7 +123,12 @@ in
           ${lib.optionalString (cfg.postgresqlPasswordFile != null) ''
             export NIXOS_SECURITY_TRACKER_DATABASE_PASSWORD="$(<${cfg.postgresqlPasswordFile})"
           ''}
-        '' else throw "unexpected database type ${cfg.database}"));
+        '' else throw "unexpected database type ${cfg.database}") + ''
+          SECRET_KEY_FILE="$STATE_DIRECTORY/secret-key"
+          test -f "$SECRET_KEY_FILE" || tr -dc A-Za-z0-9 < /dev/urandom  | head -c 128 > "$SECRET_KEY_FILE"
+
+          export NIXOS_SECURITY_TRACKER_SECRET_KEY="$(<$SECRET_KEY_FILE)"
+        '');
       in
       {
 
