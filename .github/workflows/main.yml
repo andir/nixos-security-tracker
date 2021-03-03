@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2.3.4
       - uses: nixbuild/nix-quick-install-action@v4
-      - uses: nixbuild/nixbuild-action@v4
+      - uses: nixbuild/nixbuild-action@v5
         with:
           nixbuild_ssh_key: ${{ secrets.nixbuild_ssh_key }}
       - name: black
@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2.3.4
       - uses: nixbuild/nix-quick-install-action@v4
-      - uses: nixbuild/nixbuild-action@v4
+      - uses: nixbuild/nixbuild-action@v5
         with:
           nixbuild_ssh_key: ${{ secrets.nixbuild_ssh_key }}
       - run: nix-shell --pure --run "pytest --cov=nixos_security_tracker --cov=tracker --cov-report=term --cov-report=html:coverage-report | tee pytest.log"
@@ -37,7 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2.3.4
       - uses: nixbuild/nix-quick-install-action@v4
-      - uses: nixbuild/nixbuild-action@v4
+      - uses: nixbuild/nixbuild-action@v5
         with:
           nixbuild_ssh_key: ${{ secrets.nixbuild_ssh_key }}
       - run: nix-build
@@ -52,7 +52,7 @@ jobs:
       - uses: nixbuild/nix-quick-install-action@v4
         with:
           nix_conf: "system-features = nixos-test benchmark big-parallel kvm"
-      - uses: nixbuild/nixbuild-action@v4
+      - uses: nixbuild/nixbuild-action@v5
         with:
           nixbuild_ssh_key: ${{ secrets.nixbuild_ssh_key }}
       - run: nix-build test.nix -A driver
