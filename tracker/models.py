@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 from django.db import models
 from django.urls import reverse
@@ -182,3 +182,130 @@ class Advisory(models.Model):
         """
 
         return text
+
+
+class Channel(models.Model):
+    """
+    A NixOS/Nixpkgs channel
+    """
+
+    name = models.CharField(max_length=32, unique=True)
+
+
+class ChannelRevision(models.Model):
+    """
+    One revision in a Channel
+    """
+
+    name = models.CharField(max_length=64, unique=True)
+    git_revision = models.CharField(max_length=64)
+    channel = models.ForeignKey(Channel, on_delete=models.CASCADE)
+
+    datetime_created = models.DateTimeField()
+
+    class Meta:
+        unique_together = [
+            ("name", "channel"),
+            ("git_revision", "channel"),
+        ]
+
+
+class PackageAttributeName(models.Model):
+    """
+    Storage table for attribute names
+    """
+
+    value = models.CharField(max_length=64, unique=True)
+
+
+class PackageName(models.Model):
+    """
+    Storage table for package names
+    """
+
+    value = models.CharField(max_length=64, unique=True)
+
+
+class PackageVersion(models.Model):
+    """
+    Storage table for version strings
+    """
+
+    value = models.CharField(max_length=32, unique=True)
+
+
+class Package(models.Model):
+    """
+    A Package within a specific channel revision
+    """
+
+    attribute_name_row = models.ForeignKey(
+        PackageAttributeName, blank=False, on_delete=models.CASCADE,
+        related_name="packages"
+    )
+
+    name_row = models.ForeignKey(PackageName, on_delete=models.CASCADE, related_name="packages")
+    version_row = models.ForeignKey(PackageVersion, on_delete=models.CASCADE, related_name="packages")
+
+    channel_revision = models.ForeignKey(
+        ChannelRevision, blank=False, on_delete=models.CASCADE,
+        related_name="packages",
+    )
+
+    class Meta:
+        unique_together = [
+            ("attribute_name_row", "channel_revision"),
+        ]
+
+    @property
+    def attribute_name(self):
+        return self.attribute_name_row.value
+
+    @property
+    def name(self):
+        return self.name_row.value
+
+    @property
+    def version(self):
+        return self.version_row.value
+
+    @classmethod
+    def get_or_create(
+        cls,
+        *,
+        attribute_name: str,
+        name: str,
+        version: str,
+        channel_revision: ChannelRevision,
+    ) -> Tuple["Package", bool]:
+        (
+            package_attribute_name_obj,
+            _,
+        ) = PackageAttributeName.objects.get_or_create(value=attribute_name)
+        package_name_obj, _ = PackageName.objects.get_or_create(value=name)
+        package_version_obj, _ = PackageVersion.objects.get_or_create(value=version)
+
+        package_obj, created = Package.objects.get_or_create(
+            attribute_name_row=package_attribute_name_obj,
+            channel_revision=channel_revision,
+            defaults=dict(
+                name_row=package_name_obj,
+                version_row=package_version_obj,
+            ),
+        )
+
+        if not created:
+            changed = False
+            if package_obj.name_row != package_name_obj:
+                package_obj.name_row = package_name_obj
+                changed = True
+            if package_obj.version_row != package_version_obj:
+                package_obj.version_row = package_version_obj
+                changed = True
+
+            if changed:
+                package_obj.save()
+
+        return package_obj, created
+
+
