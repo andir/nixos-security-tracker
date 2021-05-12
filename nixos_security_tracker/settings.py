@@ -87,6 +87,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "nixos_security_tracker.wsgi.application"
 
+# Use the django <3.2 auto field
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
