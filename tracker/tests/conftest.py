@@ -1,7 +1,55 @@
+import json
+
+import boto3
+import brotli
 import pytest
 from django.contrib.auth.models import User
 from django.urls import reverse
+from moto import mock_s3
 from selenium import webdriver
+
+from tracker.packages import NIX_RELEASES_BUCKET_NAME, NIX_RELEASES_OBJECT_PREFIX
+
+
+@pytest.fixture
+def fake_nix_release_bucket():
+
+    prefix = "/".join([NIX_RELEASES_OBJECT_PREFIX, "nixos-20.09", "nixos-20.09-12345"])
+    contents = {
+        f"{prefix}/git-revision": "12345",
+        f"{prefix}/nixexprs.tar.xz": "12345",
+        f"{prefix}/packages.json.br": {
+            "packages": {
+                "some-package": {
+                    "pname": "some-package",
+                    "version": "1234a.dev0",
+                },
+                "another-package": {
+                    "pname": "bar",
+                    "version": "1234a.dev0-foo",
+                },
+            }
+        },
+    }
+
+    with mock_s3():
+        client = boto3.client("s3", region_name="us-east-1")
+        client.create_bucket(Bucket=NIX_RELEASES_BUCKET_NAME)
+        for key, value in contents.items():
+            if type(value) is str:
+                client.put_object(Bucket=NIX_RELEASES_BUCKET_NAME, Key=key, Body=value)
+            elif type(value) is dict:
+                value = json.dumps(value)
+                if key.endswith(".br"):
+                    value = brotli.compress(value.encode(), quality=0)
+                    print(value)
+                client.put_object(Bucket=NIX_RELEASES_BUCKET_NAME, Key=key, Body=value)
+
+        for path in ["virtualbox-charon-images", "virtualbox-nixops-images"]:
+            key = "/".join([NIX_RELEASES_OBJECT_PREFIX, path, ".keep"])
+            client.put_object(Bucket=NIX_RELEASES_BUCKET_NAME, Key=key, Body="nope")
+
+        yield
 
 
 @pytest.fixture

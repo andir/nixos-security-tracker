@@ -1,12 +1,4 @@
-import json
-
-import boto3
-import brotli
-import pytest
-from moto import mock_s3
-
 from tracker.packages import (
-    NIX_RELEASES_BUCKET_NAME,
     NIX_RELEASES_OBJECT_PREFIX,
     Channel,
     get_revision_info,
@@ -14,37 +6,6 @@ from tracker.packages import (
     list_channels,
     load_package_list,
 )
-
-
-@pytest.fixture
-def fake_nix_release_bucket():
-
-    prefix = "/".join([NIX_RELEASES_OBJECT_PREFIX, "nixos-20.09", "nixos-20.09-12345"])
-    contents = {
-        f"{prefix}/git-revision": "12345",
-        f"{prefix}/nixexprs.tar.xz": "12345",
-        f"{prefix}/packages.json.br": {
-            "packages": {
-                "some-package": "foo",
-                "another-package": "bar",
-            }
-        },
-    }
-
-    with mock_s3():
-        client = boto3.client("s3", region_name="us-east-1")
-        client.create_bucket(Bucket=NIX_RELEASES_BUCKET_NAME)
-        for key, value in contents.items():
-            if type(value) is str:
-                client.put_object(Bucket=NIX_RELEASES_BUCKET_NAME, Key=key, Body=value)
-            elif type(value) is dict:
-                value = json.dumps(value)
-                if key.endswith(".br"):
-                    value = brotli.compress(value.encode(), quality=0)
-                    print(value)
-                client.put_object(Bucket=NIX_RELEASES_BUCKET_NAME, Key=key, Body=value)
-
-        yield
 
 
 def test_list_channels(fake_nix_release_bucket):

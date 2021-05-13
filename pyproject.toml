@@ -20,6 +20,7 @@ django-tables2 = "^2.3.3"
 psycopg2 = "^2.8.6"
 boto3 = "^1.2"
 brotlipy = "^0.7"
+tqdm = "^4.60.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.0 <6.1"
