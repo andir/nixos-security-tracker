@@ -1,4 +1,5 @@
 import json
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Iterable
@@ -34,8 +35,20 @@ def _remove_prefix(s: str, prefix: str) -> str:
     return s[len(prefix) :]
 
 
+def get_s3_client():
+    """
+    Wrapper around boto3.client to retrieve S3 clients that respect
+    a custom environment variable that points the client at an
+    alternative S3 API endpoint.
+
+    This is required for integration testing the code in a NixOS VM test.
+    """
+    endpoint_url = os.getenv("AWS_S3_ENDPOINT_URL", None)
+    return boto3.client("s3", endpoint_url=endpoint_url)
+
+
 def list_channels() -> Iterable[Channel]:
-    client = boto3.client("s3")
+    client = get_s3_client()
     paginator = client.get_paginator("list_objects_v2")
     prefix = NIX_RELEASES_OBJECT_PREFIX + "/"
     for page in paginator.paginate(
@@ -52,7 +65,7 @@ def list_channels() -> Iterable[Channel]:
 
 
 def list_channel_revisions(channel: Channel) -> Iterable[Revision]:
-    client = boto3.client("s3")
+    client = get_s3_client()
     paginator = client.get_paginator("list_objects_v2")
     for page in paginator.paginate(
         Bucket=NIX_RELEASES_BUCKET_NAME,
@@ -83,7 +96,7 @@ class RevisionInfo:
 
 
 def get_revision_info(revision: Revision):
-    client = boto3.client("s3")
+    client = get_s3_client()
     paginator = client.get_paginator("list_objects_v2")
     objects = {}
     oldest_date = None
@@ -114,7 +127,7 @@ def get_revision_info(revision: Revision):
 
 
 def load_package_list(rev: RevisionInfo) -> dict:
-    client = boto3.client("s3")
+    client = get_s3_client()
     data = client.get_object(Bucket=NIX_RELEASES_BUCKET_NAME, Key=rev.packages_path)[
         "Body"
     ].read()
