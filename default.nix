@@ -1,15 +1,25 @@
 { pkgs ? import ./nix }:
 let
-  src = pkgs.lib.cleanSourceWith {
-    filter = (name: type:
-      ! (type == "file" && pkgs.lib.hasSuffix ".nix" name)
-      && !(type == "directory" && name == ".github")
-    );
-    src = pkgs.gitignore-nix.gitignoreSource ./.;
-  };
+  cleanSource = src: pkgs.lib.cleanSourceWith (rec {
+    name = "src";
+    inherit src;
+    filter =
+      let
+        srcIgnored = pkgs.gitignore-nix.gitignoreFilter src;
+      in
+      name: type:
+        let
+          base = builtins.baseNameOf name;
+        in
+        srcIgnored name type
+        && ! (type == "regular" && pkgs.lib.hasSuffix ".nix" name)
+        && !(type == "directory" && base == ".github")
+    ;
+  });
+  src = cleanSource ./.;
   pkg = pkgs.poetry2nix.mkPoetryApplication {
     inherit src;
-    projectDir = ./.;
+    projectDir = src;
     python = pkgs.python3;
     overrides = pkgs.callPackage ./nix/python-overrides.nix { };
     checkPhase = ''

@@ -138,5 +138,6 @@ dmypy.json
 cython_debug/
 .direnv
 .pre-commit-config.yaml
-db.sqlite3
+db.sqlite3*
 result*
+data.json.gz
