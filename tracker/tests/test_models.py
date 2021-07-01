@@ -5,11 +5,34 @@ import pytz
 from django.db import transaction
 from django.db.utils import IntegrityError
 from django.urls import reverse
+from django.utils import timezone
 from freezegun import freeze_time
 
 from ..exceptions import GitHubEventBodyNotSupported
-from ..models import Advisory, AdvisorySeverity, AdvisoryStatus, GitHubEvent, Issue
-from .factories import AdvisoryFactory, IssueFactory, IssueReferenceFactory
+from ..models import (
+    Advisory,
+    AdvisorySeverity,
+    AdvisoryStatus,
+    Channel,
+    ChannelRevision,
+    GitHubEvent,
+    Issue,
+    Package,
+    PackageAttributeName,
+    PackageName,
+    PackageVersion,
+)
+from .factories import (
+    AdvisoryFactory,
+    ChannelFactory,
+    ChannelRevisionFactory,
+    IssueFactory,
+    IssueReferenceFactory,
+    PackageAttributeNameFactory,
+    PackageFactory,
+    PackageNameFactory,
+    PackageVersionFactory,
+)
 
 
 @pytest.mark.django_db
@@ -146,3 +169,190 @@ def test_model_str(klass, kwargs):
     obj = klass(**kwargs)
     s = str(obj)
     assert isinstance(s, str)
+
+
+@pytest.mark.django_db
+def test_channel_create():
+    channel = ChannelFactory()
+    channel.save()
+
+
+@pytest.mark.django_db
+def test_channel_duplicate_name():
+    channel = ChannelFactory()
+    channel.save()
+    with pytest.raises(IntegrityError):
+        Channel.objects.create(name=channel.name)
+
+
+@pytest.mark.django_db
+def test_channel_revision():
+    channel = ChannelFactory()
+    ChannelRevision.objects.create(
+        channel=channel,
+        name="some-revision",
+        git_revision="1234567",
+        datetime_created=timezone.now(),
+    )
+
+
+@pytest.mark.django_db
+def test_channel_revision_duplicate():
+    """
+    Creating a ChannelRevision with the same name twice isn't
+    allowed.
+    """
+    channel = ChannelFactory()
+    c1 = ChannelRevision.objects.create(
+        channel=channel,
+        name="some-revision",
+        git_revision="1234567",
+        datetime_created=timezone.now(),
+    )
+
+    # create a duplicate by nulling the pk
+    c1.pk = None
+    with pytest.raises(IntegrityError):
+        c1.save()
+
+
+@pytest.mark.django_db
+def test_channel_revision_duplicate_git_revision():
+    """
+    A git revision must only occur once within a channels lifetime
+    """
+    c1 = ChannelRevisionFactory()
+
+    with pytest.raises(IntegrityError):
+        ChannelRevisionFactory(
+            channel=c1.channel,
+            git_revision=c1.git_revision,
+        )
+
+
+@pytest.mark.django_db
+def test_channel_revision_no_channel():
+    """
+    A ChannelRevision must always have a channel
+    """
+    c1 = ChannelRevisionFactory()
+    c1.channel = None
+
+    with pytest.raises(IntegrityError):
+        c1.save()
+
+
+@pytest.mark.django_db
+def test_channel_revision_no_git_revision():
+    """
+    A ChannelRevision must always have a git revision
+    """
+    c1 = ChannelRevisionFactory()
+    c1.git_revision = None
+
+    with pytest.raises(IntegrityError):
+        c1.save()
+
+
+@pytest.mark.django_db
+def test_channel_revision_no_name():
+    """
+    A ChannelRevision must always have a name
+    """
+    c1 = ChannelRevisionFactory()
+    c1.name = None
+
+    with pytest.raises(IntegrityError):
+        c1.save()
+
+
+@pytest.mark.django_db
+def test_package_name():
+    PackageName.objects.create(value="test")
+
+
+@pytest.mark.django_db
+def test_package_name_duplicate():
+    PackageName.objects.create(value="test")
+    with pytest.raises(IntegrityError):
+        PackageName.objects.create(value="test")
+
+
+@pytest.mark.django_db
+def test_package_version():
+    PackageVersion.objects.create(value="test")
+
+
+@pytest.mark.django_db
+def test_package_version_duplicate():
+    PackageVersion.objects.create(value="test")
+    with pytest.raises(IntegrityError):
+        PackageVersion.objects.create(value="test")
+
+
+@pytest.mark.django_db
+def test_package_attribute_name():
+    PackageAttributeName.objects.create(value="test")
+
+
+@pytest.mark.django_db
+def test_package_attribute_name_duplicate():
+    PackageAttributeName.objects.create(value="test")
+    with pytest.raises(IntegrityError):
+        PackageAttributeName.objects.create(value="test")
+
+
+@pytest.mark.django_db
+def test_package():
+    Package.objects.create(
+        attribute_name_row=PackageAttributeNameFactory(),
+        name_row=PackageNameFactory(),
+        version_row=PackageVersionFactory(),
+        channel_revision=ChannelRevisionFactory(),
+    )
+
+
+@pytest.mark.django_db
+def test_package_duplicacte_attribute_name():
+    p1 = Package.objects.create(
+        attribute_name_row=PackageAttributeNameFactory(),
+        name_row=PackageNameFactory(),
+        version_row=PackageVersionFactory(),
+        channel_revision=ChannelRevisionFactory(),
+    )
+
+    with pytest.raises(IntegrityError):
+        PackageFactory(
+            attribute_name_row=p1.attribute_name_row,
+            channel_revision=p1.channel_revision,
+        )
+
+
+@pytest.mark.django_db
+def test_package_custom_get_or_create():
+    channel_revision = ChannelRevisionFactory()
+    p, created = Package.get_or_create(
+        attribute_name="my-package-name",
+        name="some-package-name",
+        version="123.456git",
+        channel_revision=channel_revision,
+    )
+
+    assert created
+    assert p.attribute_name == "my-package-name"
+    assert p.name == "some-package-name"
+    assert p.version == "123.456git"
+    assert p.channel_revision == channel_revision
+
+    p, created = Package.get_or_create(
+        attribute_name="my-package-name",
+        name="new-name",
+        version="3456",
+        channel_revision=channel_revision,
+    )
+
+    assert not created
+    assert p.attribute_name == "my-package-name"
+    assert p.name == "new-name"
+    assert p.version == "3456"
+    assert p.channel_revision == channel_revision
