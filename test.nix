@@ -8,6 +8,9 @@ let
     virtualisation.memorySize = 1024;
     imports = [ ./module.nix ];
     services.nixos-security-tracker.enable = true;
+    # Increase the timeout to 90s as GitHub Actions is SLOW
+    services.nixos-security-tracker.workerTimeout = 90;
+    services.nginx.appendHttpConfig = "proxy_read_timeout 90;";
 
     # enable minio in the tests to verify the S3 channel import
     services.minio = {

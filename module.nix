@@ -64,6 +64,14 @@ in
           Numbe of worker processes>
         '';
       };
+
+      workerTimeout = lib.mkOption {
+        type = lib.types.int;
+        default = 30;
+        description = ''
+          Time a worker is permitted to be silent in seconds before it is killed.
+        '';
+      };
     };
   };
   config = lib.mkIf cfg.enable {
@@ -261,7 +269,8 @@ in
             exec gunicorn ${pkgs.nixos-security-tracker.asgiPath} \
               -k uvicorn.workers.UvicornWorker \
               --name nixos-security-tracker \
-              --workers ${toString cfg.workers}
+              --workers ${toString cfg.workers} \
+              -t ${toString cfg.workerTimeout}
           '';
           serviceConfig = {
             ExecReload = "${pkgs.coreutils}/bin/kill -s HUP $MAINPID";
