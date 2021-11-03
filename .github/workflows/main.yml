@@ -7,7 +7,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2.4.0
       - uses: nixbuild/nix-quick-install-action@v6
       - uses: nixbuild/nixbuild-action@v5
         with:
@@ -19,7 +19,7 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2.4.0
       - uses: nixbuild/nix-quick-install-action@v6
       - uses: nixbuild/nixbuild-action@v5
         with:
@@ -35,7 +35,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2.4.0
       - uses: nixbuild/nix-quick-install-action@v6
       - uses: nixbuild/nixbuild-action@v5
         with:
@@ -48,7 +48,7 @@ jobs:
     # KVM on neither GitHub Actions nor nixbuild.net
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2.4.0
       - uses: nixbuild/nix-quick-install-action@v6
         with:
           nix_conf: "system-features = nixos-test benchmark big-parallel kvm"
