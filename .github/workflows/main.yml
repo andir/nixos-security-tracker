@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
-      - uses: nixbuild/nix-quick-install-action@v6
+      - uses: nixbuild/nix-quick-install-action@v9
       - uses: nixbuild/nixbuild-action@v5
         with:
           nixbuild_ssh_key: ${{ secrets.nixbuild_ssh_key }}
@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
-      - uses: nixbuild/nix-quick-install-action@v6
+      - uses: nixbuild/nix-quick-install-action@v9
       - uses: nixbuild/nixbuild-action@v5
         with:
           nixbuild_ssh_key: ${{ secrets.nixbuild_ssh_key }}
@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
-      - uses: nixbuild/nix-quick-install-action@v6
+      - uses: nixbuild/nix-quick-install-action@v9
       - uses: nixbuild/nixbuild-action@v5
         with:
           nixbuild_ssh_key: ${{ secrets.nixbuild_ssh_key }}
@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
-      - uses: nixbuild/nix-quick-install-action@v6
+      - uses: nixbuild/nix-quick-install-action@v9
         with:
           nix_conf: "system-features = nixos-test benchmark big-parallel kvm"
       - uses: nixbuild/nixbuild-action@v5
